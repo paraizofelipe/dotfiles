@@ -13,6 +13,7 @@ set backspace=indent,eol,start
 Plugin 'VundleVim/Vundle.vim'
 
 " ---- Plugins ----
+Plugin 'sickill/vim-monokai'
 Plugin 'JamshedVesuna/vim-markdown-preview'
 Plugin 'mattn/emmet-vim'
 Plugin 'davidhalter/jedi-vim'
