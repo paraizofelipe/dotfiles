@@ -4,6 +4,7 @@
 # Should you change your keyboard layout some time, delete
 # this file and re-run i3-config-wizard(1).
 #
+
 # i3 config file (v4)
 #
 # Please see http://i3wm.org/docs/userguide.html for a complete reference!
@@ -45,7 +46,8 @@ font pango:System San Francisco Display 8
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
 
-exec xrandr --output DP-1 --left-of HDMI-1
+# exec xrandr --output DP-1 --left-of HDMI-1
+exec xrandr --output DP-1 --right-of HDMI-1
 
 # start a terminal
 bindsym $mod+Return exec i3-sensible-terminal
@@ -68,6 +70,15 @@ bindsym $mod+j focus left
 bindsym $mod+k focus down
 bindsym $mod+l focus up
 bindsym $mod+semicolon focus right
+
+# Spotify
+bindsym $mod+F11 exec dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.PlayPause > /dev/null
+bindsym $mod+F12 exec dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Next > /dev/null
+bindsym $mod+F10 exec dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Previous > /dev/null
+
+bindsym XF86AudioRaiseVolume exec amixer set Master -q 5%+ #increase sound volume
+bindsym XF86AudioLowerVolume exec amixer set Master -q 5%- #decrease sound volume
+bindsym XF86AudioMute exec pactl set-sink-mute 0 toggle # mute sound
 
 # alternatively, you can use the cursor keys:
 bindsym $mod+Left focus left
@@ -101,7 +112,7 @@ bindsym $mod+s layout stacking
 bindsym $mod+w layout tabbed
 bindsym $mod+e layout toggle split
 
-bindsym $mod+Shift+l exec i3lock -c 000000
+bindsym $mod+Shift+l exec i3lock -i ~/Imagens/wallpaper_drink.png -t -n
 
 # toggle tiling / floating
 bindsym $mod+Shift+space floating toggle
@@ -189,5 +200,3 @@ bar {
                 urgent_workspace   $base01 $base01    $base08
         }
 }
-
-exec_always feh --bg-scale /home/felipe/Imagens/watch_dogs_2-dedsec-skull-hack-\(e3\).jpg
