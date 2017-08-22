@@ -33,6 +33,10 @@ set t_Co=256
 set laststatus=2
 
 " ---- TABS ----
+set tabstop=2                                                                                                                           │drwxr-xr-x  3 felipe felipe  4096 ago 20 18:24 .java
+set shiftwidth=2                                                                                                                        │drwx------  3 felipe felipe  4096 ago 20 17:16 .local
+set autoindent 
+set pastetoggle=<F2>
 
 " ---- AIRLINE ----
 let g:airline_theme='simple'
