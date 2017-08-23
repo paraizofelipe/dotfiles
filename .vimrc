@@ -37,6 +37,9 @@ set tabstop=2                                                                   
 set shiftwidth=2                                                                                                                        │drwx------  3 felipe felipe  4096 ago 20 17:16 .local
 set autoindent 
 set pastetoggle=<F2>
+set relativenumber
+set incsearch
+set hlsearch
 
 " ---- AIRLINE ----
 let g:airline_theme='simple'
