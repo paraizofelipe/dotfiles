@@ -22,6 +22,9 @@ Plugin 'vim-airline/vim-airline-themes'
 Plugin 'scrooloose/nerdtree'
 Plugin 'syntastic'
 Plugin 'joonty/vdebug'
+Plugin 'airblade/vim-gitgutter'
+Plugin 'valloric/youcompleteme'
+Plugin 'nathanaelkane/vim-indent-guides'
 
 call vundle#end()
 
@@ -33,13 +36,14 @@ set t_Co=256
 set laststatus=2
 
 " ---- TABS ----
-set tabstop=2                                                                                                                           │drwxr-xr-x  3 felipe felipe  4096 ago 20 18:24 .java
-set shiftwidth=2                                                                                                                        │drwx------  3 felipe felipe  4096 ago 20 17:16 .local
+set tabstop=2 
+set shiftwidth=2
 set autoindent 
 set pastetoggle=<F2>
 set relativenumber
 set incsearch
 set hlsearch
+
 
 " ---- AIRLINE ----
 let g:airline_theme='simple'
@@ -54,6 +58,11 @@ filetype plugin indent on
 
 map <C-n> :NERDTreeToggle<CR>
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+
+" ---- EMMET ----
+let g:user_emmet_install_global = 0
+autocmd FileType html,css EmmetInstall
+let g:user_emmet_leader_key='<C-Y>'
 
 " ---- SYNTASTIC ----
 set statusline+=%#warningmsg#

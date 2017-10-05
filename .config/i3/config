@@ -65,6 +65,8 @@ bindsym $mod+d exec dmenu_run
 bindsym $mod+Control+Left move workspace to output left
 bindsym $mod+Control+Right move workspace to output right
 
+bindsym --release $mod+p exec scrot -s /home/paraizo/%s_%H%M_%d%m%Y_$wx$h.png
+
 # change focus
 bindsym $mod+j focus left
 bindsym $mod+k focus down
