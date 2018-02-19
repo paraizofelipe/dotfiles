@@ -22,8 +22,10 @@ Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
 Plugin 'scrooloose/nerdtree'
 Plugin 'shougo/neocomplete.vim'
+Plugin 'stanangeloff/php.vim'
+Plugin 'shawncplus/phpcomplete.vim'
 Plugin 'ryanoasis/vim-devicons'
-Plugin 'tiagofumo/vim-nerdtree-syntax-highlight'
+" Plugin 'tiagofumo/vim-nerdtree-syntax-highlight'
 " Plugin 'syntastic'
 Plugin 'joonty/vdebug'
 Plugin 'airblade/vim-gitgutter'
@@ -82,6 +84,12 @@ autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isT
 let g:user_emmet_install_global = 0
 autocmd FileType html,css EmmetInstall
 let g:user_emmet_leader_key='<C-Y>'
+
+" ---- BUFFERS ----
+nmap ,v :bNext<CR>
+nmap ,b :bnext<CR>
+" nmap nd :bdelete %<CR>
+nmap ,d :b#<bar>bd#<CR>
 
 " ---- SYNTASTIC ----
 " set statusline+=%#warningmsg#
