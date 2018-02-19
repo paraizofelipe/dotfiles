@@ -23,6 +23,7 @@ Plugin 'vim-airline/vim-airline-themes'
 Plugin 'scrooloose/nerdtree'
 Plugin 'shougo/neocomplete.vim'
 Plugin 'ryanoasis/vim-devicons'
+Plugin 'tiagofumo/vim-nerdtree-syntax-highlight'
 " Plugin 'syntastic'
 Plugin 'joonty/vdebug'
 Plugin 'airblade/vim-gitgutter'
@@ -68,8 +69,10 @@ autocmd FileType python setlocal completeopt-=preview
 
 " ---- NERDTree ----
 "autocmd vimenter * NERDTree
-let g:NERDTreeDirArrowExpandable = '+'
-let g:NERDTreeDirArrowCollapsible = '-'
+let g:NERDTreeDirArrowExpandable = "\ue5ff"
+let g:NERDTreeDirArrowCollapsible = "\ue5fe"
+let g:NERDTreeHighlightFolders = 1 
+let g:NERDTreeHighlightFoldersFullName = 1
 filetype plugin indent on
 
 map <C-n> :NERDTreeToggle<CR>
