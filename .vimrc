@@ -1,7 +1,7 @@
 "Configure Vundle
 set nocompatible
 filetype off
-
+set cursorline
 
 "Vundle config
 set rtp+=~/.vim/bundle/Vundle.vim
@@ -14,6 +14,7 @@ Plugin 'VundleVim/Vundle.vim'
 
 " ---- Plugins ----
 Plugin 'sickill/vim-monokai'
+Plugin 'dracula/vim'
 Plugin 'JamshedVesuna/vim-markdown-preview'
 Plugin 'mattn/emmet-vim'
 Plugin 'davidhalter/jedi-vim'
@@ -21,14 +22,15 @@ Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
 Plugin 'scrooloose/nerdtree'
 Plugin 'shougo/neocomplete.vim'
+Plugin 'ryanoasis/vim-devicons'
 " Plugin 'syntastic'
 Plugin 'joonty/vdebug'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'pangloss/vim-javascript'
-" Plugin 'valloric/youcompleteme'
+Plugin 'valloric/youcompleteme'
 Plugin 'w0rp/ale'
-Plugin 'Yggdroot/indentLine'
-" Plugin 'nathanaelkane/vim-indent-guides'
+ Plugin 'Yggdroot/indentLine'
+"Plugin 'nathanaelkane/vim-indent-guides'
 Plugin 'fatih/vim-go'
 Plugin 'posva/vim-vue'
 Plugin 'nsf/gocode', {'rtp': 'vim/'}
@@ -59,6 +61,9 @@ set hlsearch
 " ---- AIRLINE ----
 let g:airline_theme='simple'
 let g:airline_powerline_fonts = 1
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#formatter = 'unique_tail'
+let g:airline#extensions#tabline#buffer_idx_mode = 1
 autocmd FileType python setlocal completeopt-=preview
 
 " ---- NERDTree ----
@@ -85,11 +90,26 @@ map gob :GoBuild<CR>
 map gor :GoRun<CR>
 map goi :Goinstall<CR>
 
-let g:indentLine_enabled = 1
-let g:indentLine_first_char = ""
-map gut :IndentLinesToggle<CR>
-let g:indentLine_fileType = ['c', 'cpp', 'go', 'js', 'py', 'json', 'php']
-let g:indentLine_concealcursor = ''
+" ---- Python -----
+map lo :lopen<CR>
+map lc :lclose<CR>
+
+" ---- Indent Guide -----
+
+ let g:indentLine_enabled = 0
+ let g:indentLine_first_char = ""
+ map gut :IndentLinesToggle<CR>
+ let g:indentLine_fileType = ['c', 'cpp', 'go', 'js', 'py', 'json', 'php']
+ let g:indentLine_concealcursor = ''
+
+"let g:indent_guides_enable_on_vim_startup = 1
+"let g:indent_guides_auto_colors = 0
+"hi IndentGuidesOdd  ctermbg=233
+"hi IndentGuidesEven ctermbg=234
+set ts=4 sw=4 et
+"let g:indent_guides_start_level = 2
+"let g:indent_guides_guide_size = 1
+"map gut :IndentGuidesToggle<CR>
 
 nnoremap j :m .+1<CR>==
 nnoremap k :m .-2<CR>==
