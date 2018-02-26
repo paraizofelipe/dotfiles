@@ -2,12 +2,12 @@
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 # Path to your oh-my-zsh installation.
-  export ZSH=/home/paraizo/.oh-my-zsh
+  export ZSH=/home/felipe/.oh-my-zsh
 
 # Set name of the theme to load. Optionally, if you set this to "random"
 # it'll load a random theme each time that oh-my-zsh is loaded.
 # See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
-ZSH_THEME="agnoster"
+ZSH_THEME="powerlevel9k/powerlevel9k"
 
 # Uncomment the following line to use case-sensitive completion.
 # CASE_SENSITIVE="true"
@@ -51,8 +51,7 @@ ZSH_THEME="agnoster"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git)
-
+plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
@@ -73,7 +72,7 @@ source $ZSH/oh-my-zsh.sh
 # export ARCHFLAGS="-arch x86_64"
 
 # ssh
-# export SSH_KEY_PATH="~/.ssh/rsa_id"
+# export SSH_KEY_PATH="~/.ssh/dsa_id"
 
 # Set personal aliases, overriding those provided by oh-my-zsh libs,
 # plugins, and themes. Aliases can be placed here, though oh-my-zsh
@@ -83,24 +82,21 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+alias wifi="nmtui-connect"
 
-#alias docker-clean='sudo docker ps -q -a | xargs sudo docker rm'
-#alias docker-clean-images='sudo docker rmi $(sudo docker images | grep "^<none>" | awk "{print $3}")'
+export NVM_DIR="/home/felipe/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+export PATH=$PATH:/usr/local/go/bin
+export GOROOT=$HOME/go
+export PATH=$PATH:$GOROOT/bin
 
-#DEV_PATH=~/Documentos/git
+# POWERLEVEL9K_MODE='nerdfont-complete'
+POWERLEVEL9K_MODE='awesome-fontconfig'
+POWERLEVEL9K_SHORTEN_DIR_LENGTH=1
+POWERLEVEL9K_SHORTEN_STRATEGY=truncate_folders
 
-# Delete all stopped containers
-#alias docker-clean='sudo docker ps -q -f status=exited | xargs --no-run-if-empty sudo docker rm'
-# Delete all dangling (unused) images
-#alias docker-clean-images='sudo docker images -q -f dangling=true | xargs --no-run-if-empty sudo docker rm'
+POWERLEVEL9K_SHORTEN_DELIMITER=""
 
-#export NVM_DIR="/home/paraizo/.nvm"
-#[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-#export WORKON_HOME=~/.virtualenvs
-#source /usr/local/bin/virtualenvwrapper.sh
-
-#[ -f ~/.pipsave_cd ] && source ~/.pipsave_cd # pipsave_line
-#[ -f ~/.pipsave_pip ] && source ~/.pipsave_pip # pipsave_line
-#[ -f ~/.pipsave_pip3 ] && source ~/.pipsave_pip3 # pipsave_line
-
-source ~/.commonprofile
+POWERLEVEL9K_CONTEXT_TEMPLATE=%n
+POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(context dir vcs)
+POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(virtualenv pyenv)
