@@ -5,8 +5,10 @@ Xterm*termName: xterm-256color
 XTerm*Background: black
 XTerm*Foreground: white
 XTerm*SaveLines: 2000
-XTerm*faceName: LiberationMono Nerd Font Book
+
+XTerm*faceName: LiterationMono Nerd Font Mono:style=Book
 XTerm*faceSize: 9
+
 XTerm*rightScrollBar: true
 XTerm*ScrollBar: false
 XTerm*scrollTtyOutput: false
