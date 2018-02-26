@@ -2,7 +2,7 @@
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 # Path to your oh-my-zsh installation.
-  export ZSH=/home/felipe/.oh-my-zsh
+export ZSH=/home/paraizo/.oh-my-zsh
 
 # Set name of the theme to load. Optionally, if you set this to "random"
 # it'll load a random theme each time that oh-my-zsh is loaded.
@@ -52,7 +52,21 @@ ZSH_THEME="powerlevel9k/powerlevel9k"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
+
+
+POWERLEVEL9K_MODE='awesome-fontconfig'
+POWERLEVEL9K_SHORTEN_DIR_LENGTH=1
+POWERLEVEL9K_SHORTEN_STRATEGY=truncate_folders
+
+POWERLEVEL9K_SHORTEN_DELIMITER=""
+
+POWERLEVEL9K_CONTEXT_TEMPLATE=%n
+POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(context dir vcs)
+POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(virtualenv pyenv)
+
 source $ZSH/oh-my-zsh.sh
+
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=59'
 
 # User configuration
 
@@ -84,19 +98,8 @@ source $ZSH/oh-my-zsh.sh
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias wifi="nmtui-connect"
 
-export NVM_DIR="/home/felipe/.nvm"
+export NVM_DIR="/home/paraizo/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
 export PATH=$PATH:/usr/local/go/bin
 export GOROOT=$HOME/go
 export PATH=$PATH:$GOROOT/bin
-
-# POWERLEVEL9K_MODE='nerdfont-complete'
-POWERLEVEL9K_MODE='awesome-fontconfig'
-POWERLEVEL9K_SHORTEN_DIR_LENGTH=1
-POWERLEVEL9K_SHORTEN_STRATEGY=truncate_folders
-
-POWERLEVEL9K_SHORTEN_DELIMITER=""
-
-POWERLEVEL9K_CONTEXT_TEMPLATE=%n
-POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(context dir vcs)
-POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(virtualenv pyenv)

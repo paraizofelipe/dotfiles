@@ -33,6 +33,7 @@ Plugin 'pangloss/vim-javascript'
 Plugin 'valloric/youcompleteme'
 Plugin 'w0rp/ale'
  Plugin 'Yggdroot/indentLine'
+ Plugin 'terryma/vim-multiple-cursors'
 "Plugin 'nathanaelkane/vim-indent-guides'
 Plugin 'fatih/vim-go'
 Plugin 'posva/vim-vue'
@@ -84,6 +85,12 @@ autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isT
 let g:user_emmet_install_global = 0
 autocmd FileType html,css EmmetInstall
 let g:user_emmet_leader_key='<C-Y>'
+
+" ---- MULTI CURSOR ----
+let g:multi_cursor_next_key='<C-m>'
+let g:multi_cursor_prev_key='<C-p>'
+let g:multi_cursor_skip_key='<C-x>'
+let g:multi_cursor_quit_key='<Esc>'
 
 " ---- BUFFERS ----
 nmap ,v :bNext<CR>
