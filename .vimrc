@@ -25,6 +25,9 @@ Plugin 'shougo/neocomplete.vim'
 Plugin 'stanangeloff/php.vim'
 Plugin 'shawncplus/phpcomplete.vim'
 Plugin 'ryanoasis/vim-devicons'
+Plugin 'tpope/vim-fugitive'
+Plugin 'sjl/gundo.vim'
+Plugin 'majutsushi/tagbar'
 " Plugin 'tiagofumo/vim-nerdtree-syntax-highlight'
 " Plugin 'syntastic'
 Plugin 'joonty/vdebug'
@@ -38,8 +41,10 @@ Plugin 'w0rp/ale'
 Plugin 'fatih/vim-go'
 Plugin 'posva/vim-vue'
 Plugin 'nsf/gocode', {'rtp': 'vim/'}
-" Plugin 'phildawes/racer'
 Plugin 'rust-lang/rust.vim'
+Plugin 'xolox/vim-misc'
+Plugin 'xolox/vim-easytags'
+Plugin 'junegunn/gv.vim'
 
 call vundle#end()
 
@@ -49,7 +54,7 @@ colorscheme monokai
 set number
 set t_Co=256
 set laststatus=2
-set colorcolumn=150
+set colorcolumn=120
 highlight ColorColumn ctermbg=234
 
 " ---- TABS ----
@@ -129,9 +134,23 @@ set ts=4 sw=4 et
 "let g:indent_guides_guide_size = 1
 "map gut :IndentGuidesToggle<CR>
 
+map tu :UpdateTags<CR>
+
 nnoremap j :m .+1<CR>==
 nnoremap k :m .-2<CR>==
 inoremap j <Esc>:m .+1<CR>==gi
 inoremap k <Esc>:m .-2<CR>==gi
 vnoremap j :m '>+1<CR>gv=gv
 vnoremap k :m '<-2<CR>gv=gv
+
+nnoremap <F5> :GundoToggle<CR>
+
+if has('python3')
+    let g:gundo_prefer_python3 = 1
+endif
+
+nmap <F8> :TagbarToggle<CR>
+let g:tagbar_ctags_bin = '/usr/bin/ctags'
+
+let vim_markdown_preview_github=1
+let vim_markdown_preview_toggle=1
