@@ -35,8 +35,8 @@ Plugin 'airblade/vim-gitgutter'
 Plugin 'pangloss/vim-javascript'
 Plugin 'valloric/youcompleteme'
 Plugin 'w0rp/ale'
- Plugin 'Yggdroot/indentLine'
- Plugin 'terryma/vim-multiple-cursors'
+Plugin 'Yggdroot/indentLine'
+Plugin 'terryma/vim-multiple-cursors'
 "Plugin 'nathanaelkane/vim-indent-guides'
 Plugin 'fatih/vim-go'
 Plugin 'posva/vim-vue'
@@ -47,10 +47,11 @@ Plugin 'xolox/vim-easytags'
 Plugin 'junegunn/gv.vim'
 " Plugin 'bling/vim-bufferline'
 Plugin 'qpkorr/vim-bufkill'
+Plugin 'mileszs/ack.vim'
 
 call vundle#end()
 
-:let mapleader = " "
+let mapleader = " "
 
 " ---- Theme ----
 syntax on 
@@ -130,6 +131,7 @@ map goi :Goinstall<CR>
 " ---- Python -----
 map lo :lopen<CR>
 map lc :lclose<CR>
+map ln :lnext<CR>
 
 " ---- Indent Guide -----
 
@@ -157,7 +159,7 @@ inoremap k <Esc>:m .-2<CR>==gi
 vnoremap j :m '>+1<CR>gv=gv
 vnoremap k :m '<-2<CR>gv=gv
 
-" nnoremap <F5> :GundoToggle<CR>
+nnoremap <F4> :GundoToggle<CR>
 
 if has('python3')
     let g:gundo_prefer_python3 = 1
@@ -168,3 +170,19 @@ let g:tagbar_ctags_bin = '/usr/bin/ctags'
 
 let vim_markdown_preview_github=1
 let vim_markdown_preview_toggle=1
+
+set foldmethod=indent
+set foldlevel=20
+" set foldopen=all
+hi Folded ctermbg=234
+hi Pmenu ctermbg=253 ctermfg=232
+
+set regexpengine=0
+
+nnoremap <leader>c :call ShowSpecialChar()<CR>
+
+function ShowSpecialChar()
+    syntax off
+    syntax match nonascii "[^\x00-\x7F]"
+    highlight nonascii ctermfg=0 ctermbg=1
+endfunction
