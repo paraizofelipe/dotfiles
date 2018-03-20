@@ -100,6 +100,8 @@ alias wifi="nmtui-connect"
 
 export NVM_DIR="/home/paraizo/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+
 export PATH=$PATH:/usr/local/go/bin
-export GOROOT=$HOME/go
-export PATH=$PATH:$GOROOT/bin
+export GOPATH=$HOME/go
+export GOROOT=/urs/local/go
+# export PATH=$PATH:$GOROOT/bin/
