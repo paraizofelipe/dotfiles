@@ -50,7 +50,6 @@ Plugin 'junegunn/gv.vim'
 " Plugin 'bling/vim-bufferline'
 Plugin 'qpkorr/vim-bufkill'
 Plugin 'mileszs/ack.vim'
-Plugin 'ramitos/jsctags'
 
 call vundle#end()
 
@@ -109,6 +108,28 @@ filetype plugin indent on
 
 map <C-n> :NERDTreeToggle<CR>
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+
+" NERDTress File highlighting
+function! NERDTreeHighlightFile(extension, fg, bg, guifg, guibg)
+ exec 'autocmd filetype nerdtree highlight ' . a:extension .' ctermbg='. a:bg .' ctermfg='. a:fg .' guibg='. a:guibg .' guifg='. a:guifg
+ exec 'autocmd filetype nerdtree syn match ' . a:extension .' #^\s\+.*'. a:extension .'$#'
+endfunction
+
+call NERDTreeHighlightFile('jade', 'green', 'none', 'green', '#151515')
+call NERDTreeHighlightFile('ini', 'yellow', 'none', 'yellow', '#151515')
+call NERDTreeHighlightFile('md', 'blue', 'none', '#3366FF', '#151515')
+call NERDTreeHighlightFile('yml', 'yellow', 'none', 'yellow', '#151515')
+call NERDTreeHighlightFile('config', 'yellow', 'none', 'yellow', '#151515')
+call NERDTreeHighlightFile('conf', 'yellow', 'none', 'yellow', '#151515')
+call NERDTreeHighlightFile('json', 'yellow', 'none', 'yellow', '#151515')
+call NERDTreeHighlightFile('html', 'yellow', 'none', 'yellow', '#151515')
+call NERDTreeHighlightFile('styl', 'cyan', 'none', 'cyan', '#151515')
+call NERDTreeHighlightFile('css', 'cyan', 'none', 'cyan', '#151515')
+call NERDTreeHighlightFile('coffee', 'Red', 'none', 'red', '#151515')
+call NERDTreeHighlightFile('js', 'Red', 'none', '#ffa500', '#151515')
+call NERDTreeHighlightFile('php', 'Magenta', 'none', '#ff00ff', '#151515')
+call NERDTreeHighlightFile('go', '905532', 'none', '#ff00ff', '#151515')
+call NERDTreeHighlightFile('py', 'blue', 'none', '#ff00ff', '#151515')
 
 " ---- EMMET ----
 let g:user_emmet_install_global = 0
@@ -185,7 +206,7 @@ set regexpengine=0
 
 nnoremap <leader>c :call ShowSpecialChar()<CR>
 
-function ShowSpecialChar()
+function ShowNoAsciiChar()
     syntax off
     syntax match nonascii "[^\x00-\x7F]"
     highlight nonascii ctermfg=0 ctermbg=1
@@ -194,9 +215,9 @@ endfunction
 
 let g:ale_linters = { 'javascript': ['eslint'], }
 
-let g:javascript_plugin_jsdoc = 1
+" let g:javascript_plugin_flow = 1
 let g:javascript_plugin_ngdoc = 1
-let g:javascript_plugin_flow = 1
+let g:javascript_plugin_jsdoc = 1
 
 augroup javascript_folding
     au!
@@ -230,37 +251,4 @@ function! NeatFoldText()
 endfunction
 set foldtext=NeatFoldText()
 
-let g:NERDTreeIndicatorMapCustom = {
-    \ "Modified"  : "✹",
-    \ "Staged"    : "✚",
-    \ "Untracked" : "✭",
-    \ "Renamed"   : "➜",
-    \ "Unmerged"  : "═",
-    \ "Deleted"   : "✖️",
-    \ "Dirty"     : "✗",
-    \ "Clean"     : "✔️",
-    \ 'Ignored'   : '☒',
-    \ "Unknown"   : "?"
-    \ }
 
-" NERDTress File highlighting
-function! NERDTreeHighlightFile(extension, fg, bg, guifg, guibg)
- exec 'autocmd filetype nerdtree highlight ' . a:extension .' ctermbg='. a:bg .' ctermfg='. a:fg .' guibg='. a:guibg .' guifg='. a:guifg
- exec 'autocmd filetype nerdtree syn match ' . a:extension .' #^\s\+.*'. a:extension .'$#'
-endfunction
-
-call NERDTreeHighlightFile('jade', 'green', 'none', 'green', '#151515')
-call NERDTreeHighlightFile('ini', 'yellow', 'none', 'yellow', '#151515')
-call NERDTreeHighlightFile('md', 'blue', 'none', '#3366FF', '#151515')
-call NERDTreeHighlightFile('yml', 'yellow', 'none', 'yellow', '#151515')
-call NERDTreeHighlightFile('config', 'yellow', 'none', 'yellow', '#151515')
-call NERDTreeHighlightFile('conf', 'yellow', 'none', 'yellow', '#151515')
-call NERDTreeHighlightFile('json', 'yellow', 'none', 'yellow', '#151515')
-call NERDTreeHighlightFile('html', 'yellow', 'none', 'yellow', '#151515')
-call NERDTreeHighlightFile('styl', 'cyan', 'none', 'cyan', '#151515')
-call NERDTreeHighlightFile('css', 'cyan', 'none', 'cyan', '#151515')
-call NERDTreeHighlightFile('coffee', 'Red', 'none', 'red', '#151515')
-call NERDTreeHighlightFile('js', 'Red', 'none', '#ffa500', '#151515')
-call NERDTreeHighlightFile('php', 'Magenta', 'none', '#ff00ff', '#151515')
-call NERDTreeHighlightFile('go', '905532', 'none', '#ff00ff', '#151515')
-call NERDTreeHighlightFile('py', 'blue', 'none', '#ff00ff', '#151515')

@@ -105,3 +105,4 @@ export PATH=$PATH:/usr/local/go/bin
 export GOPATH=$HOME/go
 export GOROOT=/urs/local/go
 # export PATH=$PATH:$GOROOT/bin/
+zstyle ':completion:*' menu select
