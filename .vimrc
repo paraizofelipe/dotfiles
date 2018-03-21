@@ -3,6 +3,13 @@ set nocompatible
 filetype off
 set cursorline
 
+nnoremap <C-y > "+y
+vnoremap <C-y> "+y
+nnoremap <C-p> "+p
+vnoremap <C-p> "+p
+
+nnoremap <C-m> :norm ^i// <CR>
+ 
 "Vundle config
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
@@ -50,6 +57,7 @@ Plugin 'junegunn/gv.vim'
 " Plugin 'bling/vim-bufferline'
 Plugin 'qpkorr/vim-bufkill'
 Plugin 'mileszs/ack.vim'
+Plugin 'scrooloose/nerdcommenter'
 
 call vundle#end()
 
