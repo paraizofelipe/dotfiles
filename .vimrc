@@ -8,8 +8,6 @@ vnoremap <C-y> "+y
 nnoremap <C-p> "+p
 vnoremap <C-p> "+p
 
-nnoremap <C-m> :norm ^i// <CR>
- 
 "Vundle config
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
