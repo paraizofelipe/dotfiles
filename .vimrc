@@ -35,6 +35,8 @@ Plugin 'tpope/vim-fugitive'
 Plugin 'sjl/gundo.vim'
 Plugin 'majutsushi/tagbar'
 Plugin 'Xuyuanp/nerdtree-git-plugin'
+Plugin 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plugin 'junegunn/fzf.vim'
 " Plugin 'tiagofumo/vim-nerdtree-syntax-highlight'
 " Plugin 'syntastic'
 Plugin 'joonty/vdebug'
@@ -54,7 +56,8 @@ Plugin 'xolox/vim-easytags'
 Plugin 'junegunn/gv.vim'
 " Plugin 'bling/vim-bufferline'
 Plugin 'qpkorr/vim-bufkill'
-Plugin 'mileszs/ack.vim'
+" Plugin 'mileszs/ack.vim'
+" Plugin 'rking/ag.vim'
 Plugin 'scrooloose/nerdcommenter'
 
 call vundle#end()
@@ -115,6 +118,8 @@ filetype plugin indent on
 map <C-n> :NERDTreeToggle<CR>
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 
+let g:easytags_syntax_keyword = 'always'
+
 " NERDTress File highlighting
 function! NERDTreeHighlightFile(extension, fg, bg, guifg, guibg)
  exec 'autocmd filetype nerdtree highlight ' . a:extension .' ctermbg='. a:bg .' ctermfg='. a:fg .' guibg='. a:guibg .' guifg='. a:guifg
@@ -139,8 +144,20 @@ call NERDTreeHighlightFile('py', 'blue', 'none', '#ff00ff', '#151515')
 
 " ---- EMMET ----
 let g:user_emmet_install_global = 0
-autocmd FileType html,css EmmetInstall
-let g:user_emmet_leader_key='<C-Y>'
+autocmd FileType html,vue,css,php EmmetInstall
+let g:user_emmet_leader_key='<C-e>'
+let g:user_emmet_settings = {
+  \  'php' : {
+  \    'extends' : 'html',
+  \    'filters' : 'c',
+  \  },
+  \  'xml' : {
+  \    'extends' : 'html',
+  \  },
+  \  'haml' : {
+  \    'extends' : 'html',
+  \  },
+  \}
 
 " ---- MULTI CURSOR ----
 let g:multi_cursor_start_key='<F6>'
@@ -183,6 +200,8 @@ set ts=4 sw=4 et
 
 map tu :UpdateTags<CR>
 
+inoremap j :m .+1<CR>==
+inoremap k :m .-2<CR>==
 nnoremap j :m .+1<CR>==
 nnoremap k :m .-2<CR>==
 inoremap j <Esc>:m .+1<CR>==gi
@@ -230,18 +249,18 @@ augroup javascript_folding
     au FileType javascript setlocal foldmethod=syntax
 augroup END
 
-let g:javascript_conceal_function             = "ƒ"
-let g:javascript_conceal_null                 = "ø"
-let g:javascript_conceal_this                 = "@"
-let g:javascript_conceal_return               = "⇚"
-let g:javascript_conceal_undefined            = "¿"
-let g:javascript_conceal_NaN                  = "ℕ"
-let g:javascript_conceal_prototype            = "¶"
-let g:javascript_conceal_static               = "•"
-let g:javascript_conceal_super                = "Ω"
-let g:javascript_conceal_arrow_function       = "⇒"
-let g:javascript_conceal_noarg_arrow_function = "🞅"
-let g:javascript_conceal_underscore_arrow_function = "🞅"
+" let g:javascript_conceal_function             = "ƒ"
+" let g:javascript_conceal_null                 = "ø"
+" let g:javascript_conceal_this                 = "@"
+" let g:javascript_conceal_return               = "⇚"
+" let g:javascript_conceal_undefined            = "¿"
+" let g:javascript_conceal_NaN                  = "ℕ"
+" let g:javascript_conceal_prototype            = "¶"
+" let g:javascript_conceal_static               = "•"
+" let g:javascript_conceal_super                = "Ω"
+" let g:javascript_conceal_arrow_function       = "⇒"
+" let g:javascript_conceal_noarg_arrow_function = "🞅"
+" let g:javascript_conceal_underscore_arrow_function = "🞅"
 
 " custom folding function
 " http://dhruvasagar.com/2013/03/28/vim-better-foldtext
@@ -257,4 +276,8 @@ function! NeatFoldText()
 endfunction
 set foldtext=NeatFoldText()
 
-
+command! -bang -nargs=* Ag
+  \ call fzf#vim#ag(<q-args>,
+  \                 <bang>0 ? fzf#vim#with_preview('up:60%')
+  \                         : fzf#vim#with_preview('right:50%:hidden', '?'),
+  \                 <bang>0)
