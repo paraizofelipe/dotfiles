@@ -3,7 +3,7 @@ set nocompatible
 filetype off
 set cursorline
 
-nnoremap <C-y > "+y
+nnoremap <C-y> "+y
 vnoremap <C-y> "+y
 nnoremap <C-p> "+p
 vnoremap <C-p> "+p
@@ -57,7 +57,7 @@ Plugin 'junegunn/gv.vim'
 " Plugin 'bling/vim-bufferline'
 Plugin 'qpkorr/vim-bufkill'
 " Plugin 'mileszs/ack.vim'
-" Plugin 'rking/ag.vim'
+Plugin 'rking/ag.vim'
 Plugin 'scrooloose/nerdcommenter'
 
 call vundle#end()
@@ -275,9 +275,3 @@ function! NeatFoldText()
   return foldtextstart . repeat(foldchar, winwidth(0)-foldtextlength) . foldtextend
 endfunction
 set foldtext=NeatFoldText()
-
-command! -bang -nargs=* Ag
-  \ call fzf#vim#ag(<q-args>,
-  \                 <bang>0 ? fzf#vim#with_preview('up:60%')
-  \                         : fzf#vim#with_preview('right:50%:hidden', '?'),
-  \                 <bang>0)
