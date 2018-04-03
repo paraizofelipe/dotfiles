@@ -126,3 +126,7 @@ let g:NERDTrimTrailingWhitespace = 1
 " ---- START ale ----
 let g:ale_linters = { 'javascript': ['eslint'], }
 " ----- END ale -----
+
+" ---- START fzf -----
+"
+" ---- END fzf -----
