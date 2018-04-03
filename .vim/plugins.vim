@@ -33,6 +33,8 @@ Plugin 'mileszs/ack.vim'
 Plugin 'scrooloose/nerdcommenter'
 Plugin 'Yggdroot/indentLine'
 Plugin 'qpkorr/vim-bufkill'
+Plugin 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plugin 'junegunn/fzf.vim'
 
 call vundle#end()
 filetype plugin indent on
