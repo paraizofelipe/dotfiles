@@ -9,7 +9,6 @@ set laststatus=2
 set colorcolumn=123
 highlight ColorColumn ctermbg=234
 
-
 " ---- Editor ----
 set cursorline
 set nowrap

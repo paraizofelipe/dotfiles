@@ -28,7 +28,7 @@ Plugin 'posva/vim-vue'
 Plugin 'nsf/gocode', {'rtp': 'vim/'}
 Plugin 'rust-lang/rust.vim'
 Plugin 'xolox/vim-misc'
-Plugin 'xolox/vim-easytags'
+"Plugin 'xolox/vim-easytags'
 Plugin 'mileszs/ack.vim'
 Plugin 'scrooloose/nerdcommenter'
 Plugin 'Yggdroot/indentLine'
@@ -99,8 +99,20 @@ call NERDTreeHighlightFile('py', 'blue', 'none', '#ff00ff', '#151515')
 
 " ---- START emmet ----
 let g:user_emmet_install_global = 0
-autocmd FileType html,css EmmetInstall
-let g:user_emmet_leader_key='<C-Y>'
+autocmd FileType html,vue,css,php EmmetInstall
+let g:user_emmet_leader_key='<C-e>'
+let g:user_emmet_settings = {
+  \  'php' : {
+  \    'extends' : 'html',
+  \    'filters' : 'c',
+  \  },
+  \  'xml' : {
+  \    'extends' : 'html',
+  \  },
+  \  'haml' : {
+  \    'extends' : 'html',
+  \  },
+  \}
 " ---- END emmet -----
 
 
