@@ -6,10 +6,14 @@ call vundle#begin()
 
 Plugin 'VundleVim/Vundle.vim'
 
+Plugin 'elixir-lang/vim-elixir'
+Plugin 'slashmili/alchemist.vim'
 Plugin 'sickill/vim-monokai'
+Plugin 'joshdick/onedark.vim'
 Plugin 'vim-airline/vim-airline-themes'
 Plugin 'ryanoasis/vim-devicons'
 Plugin 'mattn/emmet-vim'
+Plugin 'myhere/vim-nodejs-complete'
 Plugin 'davidhalter/jedi-vim'
 Plugin 'vim-airline/vim-airline'
 Plugin 'scrooloose/nerdtree'
@@ -28,9 +32,11 @@ Plugin 'posva/vim-vue'
 Plugin 'nsf/gocode', {'rtp': 'vim/'}
 Plugin 'rust-lang/rust.vim'
 Plugin 'xolox/vim-misc'
-Plugin 'xolox/vim-easytags'
-Plugin 'mileszs/ack.vim'
+Plugin 'plasticboy/vim-markdown'
+" Plugin 'xolox/vim-easytags'
+Plugin 'valloric/youcompleteme'
 Plugin 'scrooloose/nerdcommenter'
+Plugin 'junegunn/gv.vim'
 Plugin 'Yggdroot/indentLine'
 Plugin 'qpkorr/vim-bufkill'
 Plugin 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
@@ -53,6 +59,7 @@ autocmd FileType python setlocal completeopt-=preview
 
 
 " ---- START indentLine ----
+let g:indentLine_enabled = 0
 let g:indentLine_char = '│'
 let g:indentLine_concealcursor = 0
 let g:indentLine_conceallevel = 1
@@ -61,6 +68,7 @@ let g:indentLine_color_term = 239
 let g:indentLine_color_gui = '#3B4048'
 let g:indentLine_color_tty_light = 7 " (default: 4)
 let g:indentLine_color_dark = 1 " (default: 2)
+let g:indentLine_fileType = ['c', 'cpp', 'go', 'js', 'py', 'json', 'php']
 " ---- END indentLine ----
 
 
@@ -99,8 +107,20 @@ call NERDTreeHighlightFile('py', 'blue', 'none', '#ff00ff', '#151515')
 
 " ---- START emmet ----
 let g:user_emmet_install_global = 0
-autocmd FileType html,css EmmetInstall
-let g:user_emmet_leader_key='<C-Y>'
+autocmd FileType html,vue,css,php EmmetInstall
+let g:user_emmet_leader_key='<C-e>'
+let g:user_emmet_settings = {
+  \  'php' : {
+  \    'extends' : 'html',
+  \    'filters' : 'c',
+  \  },
+  \  'xml' : {
+  \    'extends' : 'html',
+  \  },
+  \  'haml' : {
+  \    'extends' : 'html',
+  \  },
+  \}
 " ---- END emmet -----
 
 
@@ -122,10 +142,37 @@ let g:NERDCommentEmptyLines = 1
 let g:NERDTrimTrailingWhitespace = 1
 " ---- END ---
 
-
 " ---- START ale ----
-let g:ale_linters = { 'javascript': ['eslint'], }
+let g:ale_linters = { 'elixir': ['elixir-ls'], }
 " ----- END ale -----
+
+" ---- START vim-javascript ----
+" let g:javascript_plugin_flow = 1
+let g:javascript_plugin_ngdoc = 1
+let g:javascript_plugin_jsdoc = 1
+" let g:javascript_conceal_function             = "ƒ"
+" let g:javascript_conceal_null                 = "ø"
+" let g:javascript_conceal_this                 = "@"
+" let g:javascript_conceal_return               = "⇚"
+" let g:javascript_conceal_undefined            = "¿"
+" let g:javascript_conceal_NaN                  = "ℕ"
+" let g:javascript_conceal_prototype            = "¶"
+" let g:javascript_conceal_static               = "•"
+" let g:javascript_conceal_super                = "Ω"
+" let g:javascript_conceal_arrow_function       = "⇒"
+" let g:javascript_conceal_noarg_arrow_function = "🞅"
+" let g:javascript_conceal_underscore_arrow_function = "🞅"
+" ---- END vim-javascript ---
+
+" ---- START youcomplete ----
+let g:ycm_semantic_triggers =  {
+  \   'c' : ['->', '.'],
+  \   'cpp,objcpp' : ['->', '.', '::'],
+  \   'php' : ['->', '::'],
+  \   'cs,java,javascript,typescript,d,python,perl6,scala,vb,elixir,go' : ['.'],
+  \   'ruby' : ['.', '::'],
+  \ }
+" ---- END youcomplete ----
 
 " ---- START fzf -----
 "

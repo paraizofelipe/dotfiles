@@ -7,6 +7,12 @@ inoremap <C-k> <Esc>:m .-2<CR>==gi
 vnoremap <C-j> :m '>+1<CR>gv=gv
 vnoremap <C-k> :m '<-2<CR>gv=gv
 
+nnoremap <Tab> >>_
+nnoremap <S-Tab> <<_
+inoremap <S-Tab> <C-D>
+vnoremap <Tab> >gv
+vnoremap <S-Tab> <gv
+
 " ---- clipboard ----
 vnoremap <C-y> "+y
 nnoremap <C-p> "+p
@@ -25,9 +31,13 @@ nmap <leader>9 <Plug>AirlineSelectTab9
 nmap <leader>, <Plug>AirlineSelectPrevTab
 nmap <leader>. <Plug>AirlineSelectNextTab
 
-nmap <leader>w :BW<CR>
+" ---- Buffers ----
+nmap <leader>q :BW<CR>
 nmap <leader>d :BD<CR>
-
+nnoremap <leader>Down <C-w>j
+nnoremap <leader>Up <C-w>k
+nnoremap <leader>Right <C-w>l
+nnoremap <leader>Left <C-w>h
 " ---- indentLines ----
 map gut :IndentLinesToggle<CR>
 
