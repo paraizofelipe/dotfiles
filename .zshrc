@@ -101,7 +101,18 @@ alias wifi="nmtui-connect"
 export NVM_DIR=$HOME/.nvm
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
 
-export PATH=$PATH:/usr/local/go/bin
-export GOPATH=$HOME/go
-export GOROOT=/urs/local/go/
+export GOROOT=/usr/local/go
+export PATH=$PATH:$GOROOT/bin
+export GOPATH=$(go env GOPATH)
+
 # export PATH=$PATH:$GOROOT/bin/
+
+alias apslprd00="ssh apslprd00.pgd.plus -l paraizo -p 22"
+
+if [[ -n $VIRTUAL_ENV && -e "${VIRTUAL_ENV}/bin/activate" ]]; then
+  source "${VIRTUAL_ENV}/bin/activate"
+fi
+
+eval "$(pyenv init -)"
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

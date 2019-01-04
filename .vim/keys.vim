@@ -31,9 +31,13 @@ nmap <leader>9 <Plug>AirlineSelectTab9
 nmap <leader>, <Plug>AirlineSelectPrevTab
 nmap <leader>. <Plug>AirlineSelectNextTab
 
-nmap <leader>w :BW<CR>
+" ---- Buffers ----
+nmap <leader>q :BW<CR>
 nmap <leader>d :BD<CR>
-
+nnoremap <leader>Down <C-w>j
+nnoremap <leader>Up <C-w>k
+nnoremap <leader>Right <C-w>l
+nnoremap <leader>Left <C-w>h
 " ---- indentLines ----
 map gut :IndentLinesToggle<CR>
 
