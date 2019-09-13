@@ -1,0 +1,137 @@
+set nofoldenable
+
+set mouse =
+set conceallevel=0
+set cc=123
+
+highlight ColorColumn guibg=#3a3a3a
+
+nnoremap <C-j> :m .+1<CR>==
+nnoremap <C-k> :m .-2<CR>==
+inoremap <C-j> <Esc>:m .+1<CR>==gi
+inoremap <C-k> <Esc>:m .-2<CR>==gi
+vnoremap <C-j> :m '>+1<CR>gv=gv
+vnoremap <C-k> :m '<-2<CR>gv=gv
+
+nnoremap <Tab> >>_
+nnoremap <S-Tab> <<_
+inoremap <S-Tab> <C-D>
+vnoremap <Tab> >gv
+vnoremap <S-Tab> <gv
+
+let g:python3_host_prog = expand("~/.config/nvim/python3-neovim-env/bin/python3")
+
+" ---- clipboard ----
+vnoremap <C-y> "+y
+nnoremap <C-p> "+p
+vnoremap <C-p> "+p
+
+
+" ---- START NERDTree ----
+autocmd vimenter * NERDTree
+" let g:NERDTreeDirArrowExpandable = ""
+" let g:NERDTreeDirArrowCollapsible = ""
+let g:NERDTreeShowBookmarks = 1
+let g:NERDTreeHighlightFolders = 1 
+let g:NERDTreeHighlightFoldersFullName = 1
+ 
+" autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+
+" NERDTree File highlighting
+"  function! NERDTreeHighlightFile(extension, fg, bg, guifg, guibg)
+"  exec 'autocmd filetype nerdtree highlight ' . a:extension .' ctermbg='. a:bg .' ctermfg='. a:fg .' guibg='. a:guibg .' guifg='. a:guifg
+"  exec 'autocmd filetype nerdtree syn match ' . a:extension .' #^\s\+.*'. a:extension .'$#'
+" endfunction
+"
+let g:DevIconsEnableFoldersOpenClose = 1
+let g:WebDevIconsUnicodeDecorateFolderNodes = 1
+let g:NERDTreeGitStatusNodeColorization = 1
+let g:NERDTreeGitStatusWithFlags = 1
+
+" let g:NERDTreeIndicatorMapCustom = {
+"     \ "Modified"  : "✹",
+"     \ "Staged"    : "✚",
+"     \ "Untracked" : "✭",
+"     \ "Renamed"   : "➜",
+"     \ "Unmerged"  : "═",
+"     \ "Deleted"   : "✖",
+"     \ "Dirty"     : "✗",
+"     \ "Clean"     : "✔︎",
+"     \ 'Ignored'   : '☒',
+"     \ "Unknown"   : "?"
+"     \ }
+
+let g:NERDTreeIndicatorMapCustom = {
+    \ "Modified"  : "⋆",            
+    \ "Staged"    : "•",            
+    \ "Untracked" : "∘",            
+    \ "Dirty"     : "⁖",            
+    \ "Clean"     : "✔︎",                   
+    \ }
+
+let g:NERDTreeColorMapCustom = {
+    \ "Modified"  : ["#528AB3", "NONE", "NONE", "NONE"],  
+    \ "Staged"    : ["#538B54", "NONE", "NONE", "NONE"],  
+    \ "Untracked" : ["#BE5849", "NONE", "NONE", "NONE"],  
+    \ "Dirty"     : ["#299999", "NONE", "NONE", "NONE"],  
+    \ "Clean"     : ["#87939A", "NONE", "NONE", "NONE"]   
+    \ }
+
+" call NERDTreeHighlightFile('jade', 'green', 'none', 'green', '#282c34')
+" call NERDTreeHighlightFile('ini', 'yellow', 'none', 'yellow', '#282c34')
+" call NERDTreeHighlightFile('md', 'blue', 'none', '#3366FF', '#282c34')
+" call NERDTreeHighlightFile('yml', 'yellow', 'none', 'yellow', '#282c34')
+" call NERDTreeHighlightFile('config', 'yellow', 'none', 'yellow', '#282c34')
+" call NERDTreeHighlightFile('conf', 'yellow', 'none', 'yellow', '#282c34')
+" call NERDTreeHighlightFile('json', 'yellow', 'none', 'yellow', '#282c34')
+" call NERDTreeHighlightFile('html', 'yellow', 'none', 'yellow', '#282c34')
+" call NERDTreeHighlightFile('styl', 'cyan', 'none', 'cyan', '#282c34')
+" call NERDTreeHighlightFile('css', 'cyan', 'none', 'cyan', '#282c34')
+" call NERDTreeHighlightFile('coffee', 'Red', 'none', 'red', '#282c34')
+" call NERDTreeHighlightFile('js', 'Red', 'none', '#ffa500', '#282c34')
+" call NERDTreeHighlightFile('php', 'Magenta', 'none', '#ff00ff', '#282c34')
+" call NERDTreeHighlightFile('go', '905532', 'none', '#ff00ff', '#282c34')
+" call NERDTreeHighlightFile('py', 'blue', 'none', '#ff00ff', '#282c34')
+" ---- END NERDTree ----
+
+" ---- START emmet ----
+let g:user_emmet_install_global = 0
+autocmd FileType html,vue,css,php EmmetInstall
+let g:user_emmet_leader_key='<C-e>'
+let g:user_emmet_settings = {
+  \  'php' : {
+  \    'extends' : 'html',
+  \    'filters' : 'c',
+  \  },
+  \  'xml' : {
+  \    'extends' : 'html',
+  \  },
+  \  'haml' : {
+  \    'extends' : 'html',
+  \  },
+  \}
+" ---- END emmet -----
+
+
+" ---- START vim-multiple-cursor ----
+let g:multi_cursor_start_key='<F6>'
+let g:multi_cursor_next_key='<C-m>'
+let g:multi_cursor_prev_key='<C-p>'
+let g:multi_cursor_skip_key='<C-x>'
+let g:multi_cursor_quit_key='<Esc>'
+" ---- END vim-multiple-cursors ---- 
+
+
+" ---- START nerdcomment ----
+let g:NERDSpaceDelims = 1
+let g:NERDCompactSexyComs = 1
+let g:NERDDefaultAlign = 'left'
+let g:NERDAltDelims_java = 1
+let g:NERDCommentEmptyLines = 1
+let g:NERDTrimTrailingWhitespace = 1
+" ---- END ---
+
+" ---- START prettier ----
+let g:prettier#autoformat = 0
+autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql,*.md,*.vue,*.yaml,*.html Prettier
+" ---- END ----

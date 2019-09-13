@@ -7,7 +7,7 @@ export ZSH=$HOME/.oh-my-zsh
 # Set name of the theme to load. Optionally, if you set this to "random"
 # it'll load a random theme each time that oh-my-zsh is loaded.
 # See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
-ZSH_THEME="powerlevel9k/powerlevel9k"
+ZSH_THEME="robbyrussell"
 
 # Uncomment the following line to use case-sensitive completion.
 # CASE_SENSITIVE="true"
@@ -54,15 +54,15 @@ ZSH_THEME="powerlevel9k/powerlevel9k"
 plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
 
 
-POWERLEVEL9K_MODE='awesome-fontconfig'
-POWERLEVEL9K_SHORTEN_DIR_LENGTH=1
-POWERLEVEL9K_SHORTEN_STRATEGY=truncate_folders
-
-POWERLEVEL9K_SHORTEN_DELIMITER=""
-
-POWERLEVEL9K_CONTEXT_TEMPLATE=%n
-POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(context dir vcs)
-POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(virtualenv pyenv)
+#POWERLEVEL9K_MODE='awesome-fontconfig'
+# POWERLEVEL9K_SHORTEN_DIR_LENGTH=1
+# POWERLEVEL9K_SHORTEN_STRATEGY=truncate_folders
+# 
+# POWERLEVEL9K_SHORTEN_DELIMITER=""
+# 
+# POWERLEVEL9K_CONTEXT_TEMPLATE=%n
+# POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(context dir vcs)
+# POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(virtualenv pyenv)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -97,6 +97,7 @@ ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=59'
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias wifi="nmtui-connect"
+alias ls="ls --color"
 
 export NVM_DIR=$HOME/.nvm
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
@@ -104,6 +105,7 @@ export NVM_DIR=$HOME/.nvm
 export GOROOT=/usr/local/go
 export PATH=$PATH:$GOROOT/bin
 export GOPATH=$(go env GOPATH)
+export PATH=$PATH:$(go env GOPATH)/bin
 
 # export PATH=$PATH:$GOROOT/bin/
 
@@ -116,3 +118,12 @@ fi
 eval "$(pyenv init -)"
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+fpath=($fpath "/home/paraizo/.zfunctions")
+
+# Set Spaceship ZSH as a prompt
+#autoload -U promptinit; promptinit
+#prompt spaceship
+
+#SPACESHIP_PROMPT_SEPARATE_LINE=false
+
+source ~/.bin/tmuxinator.zsh

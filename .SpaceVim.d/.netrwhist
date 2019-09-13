@@ -1,0 +1,10 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhist_cnt =8
+let g:netrw_dirhist_1='/home/paraizo/.SpaceVim'
+let g:netrw_dirhist_2='/home/paraizo/.SpaceVim/config'
+let g:netrw_dirhist_3='/home/paraizo/.SpaceVim'
+let g:netrw_dirhist_4='/home/paraizo/.SpaceVim/.gitee'
+let g:netrw_dirhist_5='/home/paraizo/.SpaceVim'
+let g:netrw_dirhist_6='/home/paraizo/.SpaceVim.d'
+let g:netrw_dirhist_7='/home/paraizo'
+let g:netrw_dirhist_8='/home/paraizo/.SpaceVim/config'
