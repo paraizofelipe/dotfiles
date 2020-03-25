@@ -4,7 +4,15 @@ set mouse =
 set conceallevel=0
 set cc=123
 
+set tabstop=4 shiftwidth=4 expandtab
+set foldmethod=indent
+
+set list lcs=tab:\|\ 
+
 highlight ColorColumn guibg=#3a3a3a
+
+" nnoremap <C-b> :DlvToggleBreakpoint<CR>
+" nnoremap <C-d> :DlvDebug
 
 nnoremap <C-j> :m .+1<CR>==
 nnoremap <C-k> :m .-2<CR>==
@@ -14,12 +22,25 @@ vnoremap <C-j> :m '>+1<CR>gv=gv
 vnoremap <C-k> :m '<-2<CR>gv=gv
 
 nnoremap <Tab> >>_
-nnoremap <S-Tab> <<_
+noremap <S-Tab> <<_
 inoremap <S-Tab> <C-D>
 vnoremap <Tab> >gv
 vnoremap <S-Tab> <gv
 
-let g:python3_host_prog = expand("~/.config/nvim/python3-neovim-env/bin/python3")
+let g:deoplete#sources#go#gocode_binary = $GOPATH.'/bin/gocode'
+
+let g:python2_host_prog = expand("~/.config/nvim/python2-neovim-env/bin/python")
+let g:python3_host_prog = expand("~/.config/nvim/python3-neovim-env/bin/python")
+
+" let g:mergetool_layout = 'mr,b'
+" let g:mergetool_prefer_revision = 'local'
+nmap <leader>mt <plug>(MergetoolToggle)
+nnoremap <silent> <leader>mb :call mergetool#toggle_layout('mr,b')<CR>
+
+nmap <expr> <C-Left> &diff? '<Plug>(MergetoolDiffExchangeLeft)' : '<C-Left>'
+nmap <expr> <C-Right> &diff? '<Plug>(MergetoolDiffExchangeRight)' : '<C-Right>'
+nmap <expr> <C-Down> &diff? '<Plug>(MergetoolDiffExchangeDown)' : '<C-Down>'
+nmap <expr> <C-Up> &diff? '<Plug>(MergetoolDiffExchangeUp)' : '<C-Up>'
 
 " ---- clipboard ----
 vnoremap <C-y> "+y
@@ -32,9 +53,9 @@ autocmd vimenter * NERDTree
 " let g:NERDTreeDirArrowExpandable = ""
 " let g:NERDTreeDirArrowCollapsible = ""
 let g:NERDTreeShowBookmarks = 1
-let g:NERDTreeHighlightFolders = 1 
+let g:NERDTreeHighlightFolders = 1
 let g:NERDTreeHighlightFoldersFullName = 1
- 
+
 " autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 
 " NERDTree File highlighting
@@ -48,33 +69,20 @@ let g:WebDevIconsUnicodeDecorateFolderNodes = 1
 let g:NERDTreeGitStatusNodeColorization = 1
 let g:NERDTreeGitStatusWithFlags = 1
 
-" let g:NERDTreeIndicatorMapCustom = {
-"     \ "Modified"  : "✹",
-"     \ "Staged"    : "✚",
-"     \ "Untracked" : "✭",
-"     \ "Renamed"   : "➜",
-"     \ "Unmerged"  : "═",
-"     \ "Deleted"   : "✖",
-"     \ "Dirty"     : "✗",
-"     \ "Clean"     : "✔︎",
-"     \ 'Ignored'   : '☒',
-"     \ "Unknown"   : "?"
-"     \ }
-
 let g:NERDTreeIndicatorMapCustom = {
-    \ "Modified"  : "⋆",            
-    \ "Staged"    : "•",            
-    \ "Untracked" : "∘",            
-    \ "Dirty"     : "⁖",            
-    \ "Clean"     : "✔︎",                   
+    \ "Modified"  : "⋆",
+    \ "Staged"    : "•",
+    \ "Untracked" : "∘",
+    \ "Dirty"     : "⁖",
+    \ "Clean"     : "✔︎",
     \ }
 
 let g:NERDTreeColorMapCustom = {
-    \ "Modified"  : ["#528AB3", "NONE", "NONE", "NONE"],  
-    \ "Staged"    : ["#538B54", "NONE", "NONE", "NONE"],  
-    \ "Untracked" : ["#BE5849", "NONE", "NONE", "NONE"],  
-    \ "Dirty"     : ["#299999", "NONE", "NONE", "NONE"],  
-    \ "Clean"     : ["#87939A", "NONE", "NONE", "NONE"]   
+    \ "Modified"  : ["#528AB3", "NONE", "NONE", "NONE"],
+    \ "Staged"    : ["#538B54", "NONE", "NONE", "NONE"],
+    \ "Untracked" : ["#BE5849", "NONE", "NONE", "NONE"],
+    \ "Dirty"     : ["#299999", "NONE", "NONE", "NONE"],
+    \ "Clean"     : ["#87939A", "NONE", "NONE", "NONE"]
     \ }
 
 " call NERDTreeHighlightFile('jade', 'green', 'none', 'green', '#282c34')
@@ -114,12 +122,18 @@ let g:user_emmet_settings = {
 
 
 " ---- START vim-multiple-cursor ----
-let g:multi_cursor_start_key='<F6>'
-let g:multi_cursor_next_key='<C-m>'
-let g:multi_cursor_prev_key='<C-p>'
-let g:multi_cursor_skip_key='<C-x>'
-let g:multi_cursor_quit_key='<Esc>'
-" ---- END vim-multiple-cursors ---- 
+let g:multi_cursor_use_default_mapping=0
+
+" Default mapping
+let g:multi_cursor_start_word_key      = '<C-n>'
+let g:multi_cursor_select_all_word_key = '<A-n>'
+let g:multi_cursor_start_key           = 'g<C-n>'
+let g:multi_cursor_select_all_key      = 'g<A-n>'
+let g:multi_cursor_next_key            = '<C-n>'
+let g:multi_cursor_prev_key            = '<C-p>'
+let g:multi_cursor_skip_key            = '<C-x>'
+let g:multi_cursor_quit_key            = '<Esc>'
+" ---- END vim-multiple-cursors ----
 
 
 " ---- START nerdcomment ----

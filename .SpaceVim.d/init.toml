@@ -26,24 +26,55 @@
 
 [[custom_plugins]]
     name = 'joshdick/onedark.vim'
+    merged = 0
 
 [[custom_plugins]]
     name = "ryanoasis/vim-devicons"
+    merged = 0
 
 [[custom_plugins]]
     name = "rking/ag.vim"
+    merged = 0
 
 [[custom_plugins]]
     name = "tiagofumo/vim-nerdtree-syntax-highlight"
+    merged = 0
 
 [[custom_plugins]]
     name = "sebdah/vim-delve"
+    merged = 0
 
 [[custom_plugins]]
     name = "buoto/gotests-vim"
+    merged = 0
 
 [[custom_plugins]]
     name = "prettier/vim-prettier"
+    merged = 0
+
+[[custom_plugins]]
+    name = "mileszs/ack.vim"
+    merged = 0
+
+[[custom_plugins]]
+    name = "nsf/gocode"
+    merged = 0
+
+[[custom_plugins]]
+    name = "samoshkin/vim-mergetool"
+    merged = 0
+
+[[custom_plugins]]
+    name = "terryma/vim-multiple-cursors"
+    merged = 0
+
+[[custom_plugins]]
+    name = "airblade/vim-gitgutter"
+    merged = 0
+
+[[custom_plugins]]
+    name = "tpope/vim-fugitive"
+    merged = 0
 
 # [[custom_plugins]]
 #    name = 'vim-airline/vim-airline'
@@ -51,16 +82,13 @@
 #[[custom_plugins]]
 #    name = 'vim-airline/vim-airline-themes'
 
-[[layers]]
-  name = "VersionControl"
+# ---- LAYERS ----
 
-# [[layers]]
-#     name = 'core#statusline'
-#     enable = true
- 
-# [[layers]]
-#     name = 'core#tabline'
-#     enable = false
+[[layers]]
+    name = "gtags"
+
+[[layers]]
+    name = "VersionControl"
 
 [[layers]]
     name = 'checkers'
@@ -112,6 +140,7 @@
 
 [[layers]]
     name = 'lang#python'
+    enable_typeinfo = true
 
 [[layers]]
     name = 'lang#javascript'
