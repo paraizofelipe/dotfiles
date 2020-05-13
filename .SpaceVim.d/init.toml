@@ -8,7 +8,7 @@
 
 # All SpaceVim option below [option] section
 [options]
-    colorscheme = "onedark"
+    colorscheme = "gruvbox"
     background = "dark"
     enable_guicolors = true
     statusline_separator = "arrow"

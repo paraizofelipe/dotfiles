@@ -14,6 +14,14 @@ highlight ColorColumn guibg=#3a3a3a
 " nnoremap <C-b> :DlvToggleBreakpoint<CR>
 " nnoremap <C-d> :DlvDebug
 
+nnoremap Q q
+
+" For local replace
+nnoremap gr gd[{V%::s/<C-R>///gc<left><left><left>
+
+" For global replace
+nnoremap gR gD:%s/<C-R>///gc<left><left><left>
+
 nnoremap <C-j> :m .+1<CR>==
 nnoremap <C-k> :m .-2<CR>==
 inoremap <C-j> <Esc>:m .+1<CR>==gi
@@ -148,4 +156,12 @@ let g:NERDTrimTrailingWhitespace = 1
 " ---- START prettier ----
 let g:prettier#autoformat = 0
 autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql,*.md,*.vue,*.yaml,*.html Prettier
+" ---- END ----
+
+" ---- START vim-go ----
+let g:go_fmt_fail_silently = 1
+call deoplete#custom#option('omni_patterns', { 'go': '[^. *\t]\.\w*' })
+let g:go_highlight_types = 1
+let g:go_highlight_diagnostic_errors = 0
+let g:go_highlight_diagnostic_warnings = 0
 " ---- END ----
