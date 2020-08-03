@@ -11,9 +11,6 @@ set list lcs=tab:\|\
 
 highlight ColorColumn guibg=#3a3a3a
 
-" nnoremap <C-b> :DlvToggleBreakpoint<CR>
-" nnoremap <C-d> :DlvDebug
-
 nnoremap Q q
 
 " For local replace
@@ -130,7 +127,7 @@ let g:user_emmet_settings = {
 
 
 " ---- START vim-multiple-cursor ----
-let g:multi_cursor_use_default_mapping=0
+ let g:multi_cursor_use_default_mapping=0
 
 " Default mapping
 let g:multi_cursor_start_word_key      = '<C-n>'
@@ -175,10 +172,13 @@ autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.gra
 
 " ---- START vim-go ----
 let g:go_fmt_fail_silently = 1
-call deoplete#custom#option('omni_patterns', { 'go': '[^. *\t]\.\w*' })
+" call deoplete#custom#option('omni_patterns', { 'go': '[^. *\t]\.\w*' })
+let g:go_fold_enable = ['import']
 let g:go_highlight_types = 1
+let g:go_highlight_function_parameters = 1
 let g:go_highlight_diagnostic_errors = 0
 let g:go_highlight_diagnostic_warnings = 0
+let g:go_fmt_experimental = 1
 " ---- END ----
 
 " ---- snippets ----

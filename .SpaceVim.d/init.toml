@@ -17,7 +17,7 @@
     enable_tabline_filetype_icon = true
     enable_statusline_display_mode = false
     filemanager = "nerdtree"
-    sidebar_direction = 'left'
+    sidebar_direction = 'right'
     tabstop = 4
     expandtab = true
     shiftwidth = 4
@@ -26,6 +26,10 @@
 
 [[custom_plugins]]
     name = 'joshdick/onedark.vim'
+    merged = 0
+
+[[custom_plugins]]
+    name = 'mg979/vim-visual-multi'
     merged = 0
 
 [[custom_plugins]]
@@ -65,10 +69,6 @@
     merged = 0
 
 [[custom_plugins]]
-    name = "terryma/vim-multiple-cursors"
-    merged = 0
-
-[[custom_plugins]]
     name = "airblade/vim-gitgutter"
     merged = 0
 
@@ -94,8 +94,8 @@
     name = 'checkers'
     lint_on_the_fly = true
 
-[[layers]]
-    name = 'debug'
+# [[layers]]
+#    name = 'debug'
 
 [[layers]]
     name = 'default'
