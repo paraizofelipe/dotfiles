@@ -37,10 +37,6 @@
     merged = 0
 
 [[custom_plugins]]
-    name = "rking/ag.vim"
-    merged = 0
-
-[[custom_plugins]]
     name = "tiagofumo/vim-nerdtree-syntax-highlight"
     merged = 0
 
@@ -120,14 +116,14 @@
 [[layers]]
     name = 'lang#dockerfile'
 
-[[layers]]
-    name = 'lang#graphql'
+# [[layers]]
+#    name = 'lang#graphql'
 
-[[layers]]
-    name = 'lang#ruby'
+# [[layers]]
+#    name = 'lang#ruby'
 
-[[layers]]
-    name = 'lang#vue'
+# [[layers]]
+#    name = 'lang#vue'
 
 [[layers]]
     name = 'lang#markdown'
@@ -142,8 +138,8 @@
     name = 'lang#python'
     enable_typeinfo = true
 
-[[layers]]
-    name = 'lang#javascript'
+# [[layers]]
+#    name = 'lang#javascript'
 
 [[layers]]
     name = 'lang#toml'
