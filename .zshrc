@@ -101,15 +101,6 @@ source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 export GOPATH=/Users/paraizo/go
 export PATH=$GOPATH/bin:$PATH
 
-export IP=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
-
-REDIS_URL=redis://$IP:6379/0
-DATABASE_URL=postgres://olist:olist@$IP:5432/freight_v2_test?sslmode=disable
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 # alias freight_prod="REDIS_URL=redis://localhost/0;DATABASE_URL=postgres://olist:olist@localhost/freight_v2?sslmode=disable"
