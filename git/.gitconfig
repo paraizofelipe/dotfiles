@@ -1,0 +1,56 @@
+[url "git@github.com:"]
+	insteadOf = https://github.com/
+[user]
+	name = Paraizo
+    email = felipeparaizo@gmail.com
+
+[diff]
+	tool = vimdiff
+
+[difftool]
+    prompt = true
+    prompt = false
+	trustExitCode = true
+
+[merge]
+	tool = vim_mergetool
+    conflictStyle = diff3
+
+[mergetool]
+    keepBackup = false
+    prompt = false
+	trustExitCode = true
+
+[mergetool "vim_mergetool"]
+    cmd = nvim -f -c "MergetoolStart" "$MERGED" "$BASE" "$LOCAL" "$REMOTE"
+    trustExitCode = true
+
+[alias]
+	d = difftool
+
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+
+[mergetool "vimdiff"]
+	path = nvim
+
+[pull]
+	rabase = false
+	rebase = false
+
+[core]
+    pager = delta
+	excludesfile = /home/paraizo/.gitignore
+
+[delta]
+    line-numbers = true
+    side-by-side = true
+    plus-color = "#012800"
+    minus-color = "#340001"
+    syntax-theme = gruvbox
+
+[interactive]
+    diffFilter = delta --color-only
