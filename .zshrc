@@ -68,18 +68,14 @@ ZSH_THEME="robbyrussell"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-source $ZSH/oh-my-zsh.sh
 plugins=(git)
-# plugins=(zsh-autosuggestions)
-# plugins=(zsh-syntax-highlighting)
 
+source $ZSH/oh-my-zsh.sh
+
+# source $ZSH/custom/plugins/zsh-vi-mode/zsh-vi-mode.zsh
 source $ZSH/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 source $ZSH/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source $ZSH/plugins/fzf/fzf.plugin.zsh
-
-# VI mode
-# bindkey -v
-# export KEYTIMEOUT=1
 
 # User configuration
 
@@ -106,13 +102,40 @@ source $ZSH/plugins/fzf/fzf.plugin.zsh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-#
 
-GOROOT=/usr/local/go
-GOPATH=~/go
+alias k="kubectl"
 
-PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+stty -ixon -ixoff
 
-export NVM_DIR="$HOME/.nvm"                                                              
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion 
+export GOPRIVATE="github.com/olist/*"
+
+# export NVM_DIR="$HOME/.nvm"
+# [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+# [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+[ -z "$NVM_DIR" ] && export NVM_DIR="$HOME/.nvm"
+source /usr/share/nvm/nvm.sh
+source /usr/share/nvm/bash_completion
+source /usr/share/nvm/install-nvm-exec
+
+export GOPATH=~/go
+export GOROOT=/usr/local/go
+export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+
+alias go="grc go"
+alias kctl="kubectl"
+
+export PATH="$HOME/.poetry/bin:$PATH"
+
+source $HOME/.poetry/env
+source $HOME/.env
+
+[[ /usr/local/bin/kubectl ]] && source <(kubectl completion zsh)
+
+[ -s ~/.luaver/luaver ] && . ~/.luaver/luaver
+
+eval "$(pyenv virtualenv-init -)"
+eval "$(pyenv init -)"
+source /usr/share/nvm/init-nvm.sh
+
+# source ~/aws
