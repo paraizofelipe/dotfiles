@@ -90,6 +90,7 @@ source $ZSH/plugins/fzf/fzf.plugin.zsh
 # else
 #   export EDITOR='mvim'
 # fi
+export EDITOR='nvim'
 
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
@@ -103,39 +104,43 @@ source $ZSH/plugins/fzf/fzf.plugin.zsh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
+export BAT_THEME=gruvbox-dark
+export HIGHLIGHT_STYLE=gruvbox-dark-medium
+
 alias k="kubectl"
 
 stty -ixon -ixoff
 
-export GOPRIVATE="github.com/olist/*"
+export NVM_DIR="$HOME/.config/nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-# export NVM_DIR="$HOME/.nvm"
-# [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-# [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-[ -z "$NVM_DIR" ] && export NVM_DIR="$HOME/.nvm"
-source /usr/share/nvm/nvm.sh
-source /usr/share/nvm/bash_completion
-source /usr/share/nvm/install-nvm-exec
+# [ -z "$NVM_DIR" ] && export NVM_DIR="$HOME/.nvm"
+# source /usr/share/nvm/nvm.sh
+# source /usr/share/nvm/bash_completion
+# source /usr/share/nvm/install-nvm-exec
 
 export GOPATH=~/go
 export GOROOT=/usr/local/go
 export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 
-alias go="grc go"
-alias kctl="kubectl"
+# alias go="grc go"
+# alias kctl="kubectl"
 
 export PATH="$HOME/.poetry/bin:$PATH"
 
 source $HOME/.poetry/env
 source $HOME/.env
 
-[[ /usr/local/bin/kubectl ]] && source <(kubectl completion zsh)
+# [[ /usr/local/bin/kubectl ]] && source <(kubectl completion zsh)
 
 [ -s ~/.luaver/luaver ] && . ~/.luaver/luaver
 
-eval "$(pyenv virtualenv-init -)"
-eval "$(pyenv init -)"
-source /usr/share/nvm/init-nvm.sh
+# eval "$(pyenv virtualenv-init -)"
+# eval "$(pyenv init -)"
+
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init --path)"
 
 # source ~/aws
