@@ -2,7 +2,7 @@
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 # Path to your oh-my-zsh installation.
-export ZSH="/home/paraizo/.oh-my-zsh"
+export ZSH="/home/$USER/.oh-my-zsh"
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -125,12 +125,13 @@ export GOROOT=/usr/local/go
 export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 
 # alias go="grc go"
-# alias kctl="kubectl"
+alias kctl="kubectl"
 
 export PATH="$HOME/.poetry/bin:$PATH"
 
 source $HOME/.poetry/env
 source $HOME/.env
+# source $HOME/.database.env
 
 # [[ /usr/local/bin/kubectl ]] && source <(kubectl completion zsh)
 
@@ -142,5 +143,3 @@ source $HOME/.env
 export PYENV_ROOT="$HOME/.pyenv"
 export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init --path)"
-
-# source ~/aws
