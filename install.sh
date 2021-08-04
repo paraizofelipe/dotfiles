@@ -7,6 +7,7 @@ ln -sf $PWD/tmux/.tmux.conf $HOME/.tmux.conf
 ln -s $PWD/alacritty $HOME/.config/alacritty
 ln -s $PWD/bat $HOME/.config/bat
 ln -s $PWD/i3 $HOME/.config/i3
+ln -s $PWD/i3blocks $HOME/.config/i3blocks
 ln -s $PWD/qutebrowser $HOME/.config/qutebrowser
 ln -s $PWD/ranger $HOME/.config/ranger
 
