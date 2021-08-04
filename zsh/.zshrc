@@ -2,7 +2,7 @@
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 # Path to your oh-my-zsh installation.
-export ZSH="/home/felipe/.oh-my-zsh"
+export ZSH="/home/paraizo/.oh-my-zsh"
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -139,7 +139,9 @@ source $HOME/.database.env
 
 # eval "$(pyenv virtualenv-init -)"
 # eval "$(pyenv init -)"
-
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init --path)"
+# export PYENV_VIRTUALENV_DISABLE_PROMPT=1
+#
+# export PYENV_ROOT="$HOME/.pyenv"
+# export PATH="$PYENV_ROOT/bin:$PATH"
+# eval "$(pyenv virtualenv-init -)"
+# eval "$(pyenv init -)"
