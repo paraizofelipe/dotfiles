@@ -119,7 +119,7 @@ tags
 
 # Coc configuration directory
 .vim
-
+.vimspector.json
 pyrightconfig.json
 venv
 .venv
