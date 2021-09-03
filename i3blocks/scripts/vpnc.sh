@@ -8,6 +8,6 @@ ICON=" "
 echo "$ICON vpn"
 echo "$ICON vpn"
 
-[ ! $IFACE ] && echo "#454947"
+[ ! $IFACE ] && echo "#515754"
 
 exit 0

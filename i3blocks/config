@@ -28,15 +28,6 @@ markup=none
 command=~/.config/i3blocks/scripts/vpnc.sh
 interval=10
 
-[volume]
-label=
-#label=♪
-command=amixer get Master | grep -E -o '[0-9]{1,3}?%' | head -1
-instance=Master
-#instance=PCM
-interval=once
-signal=10
-
 [cpu_usage]
 label= 
 interval=10
@@ -58,6 +49,15 @@ interval=30
 label= 
 #instance=/mnt/data
 interval=30
+
+[volume]
+label=
+#label=♪
+command=amixer get Master | grep -E -o '[0-9]{1,3}?%' | head -1
+instance=Master
+#instance=PCM
+interval=once
+signal=10
 
 # [ip]
 # command=hostname -i | awk '{ print " " $1 }'
