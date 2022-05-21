@@ -6,11 +6,10 @@
 
 BAT=$(upower -i $(upower -e | grep BAT) | grep --color=never -E "state|to\ full|to\ empty|percentage")
 
-CHARGE=$(echo "$BAT" | grep percentage | cut -d : -f 2 | sed 's/ //g')
+CHARGE=$(echo "$BAT" | grep percentage | cut -d : -f 2)
 STATE=$(echo "$BAT" | grep state | cut -d : -f 2)
-TIME=$(echo "$BAT" | grep time | cut -d : -f 2 | sed 's/ //g')
+TIME=$(echo "$BAT" | grep time | cut -d : -f 2)
 ICON=""
-
 
 if [ $STATE == "discharging" ]; then
     [ ${CHARGE%?} -lt 100 -a ${CHARGE%?} -ge 90 ] && ICON=" "

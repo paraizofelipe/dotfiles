@@ -426,3 +426,5 @@ mode "$mode_gaps_outer" {
         bindsym Return mode "default"
         bindsym Escape mode "default"
 }
+
+bindsym --release $mod+y exec --no-startup-id xdotool search --name '^Meet\:.+$' windowactivate --sync key ctrl+d

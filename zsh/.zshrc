@@ -127,8 +127,16 @@ export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 # alias go="grc go"
 alias kctl="kubectl"
 
-export PATH="$HOME/.poetry/bin:$PATH"
+# export PYENV_VIRTUALENV_DISABLE_PROMPT=1
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init --path)"
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
 
+export PYTHONBREAKPOINT=pdb.set_trace
+
+export PATH="$HOME/.poetry/bin:$PATH"
 source $HOME/.poetry/env
 source $HOME/.env
 source $HOME/.database.env
@@ -137,11 +145,4 @@ source $HOME/.database.env
 
 [ -s ~/.luaver/luaver ] && . ~/.luaver/luaver
 
-# eval "$(pyenv virtualenv-init -)"
-# eval "$(pyenv init -)"
-# export PYENV_VIRTUALENV_DISABLE_PROMPT=1
 
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init --path)"
-eval "$(pyenv init -)"
