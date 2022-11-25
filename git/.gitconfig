@@ -52,3 +52,7 @@
 
 [interactive]
     diffFilter = delta --color-only
+
+[credential "https://gitlab.luizalabs.com"]
+	helper = 
+	helper = !/usr/bin/glab auth git-credential
