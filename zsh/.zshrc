@@ -33,6 +33,8 @@ export NVM_DIR="$HOME/.nvm"
 
 export I3BLOCKS_CONTRIB=~/projects/i3blocks-contrib 
 
+export PATH=$PATH:$HOME/.local/bin
+
 export GOPATH=~/go
 export GOROOT=/usr/local/go
 export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
