@@ -39,6 +39,8 @@ export GOPATH=~/go
 export GOROOT=/usr/local/go
 export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 
+alias ls="exa"
+
 # alias go="grc go"
 alias kctl="kubectl"
 
