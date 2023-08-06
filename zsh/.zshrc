@@ -1,6 +1,7 @@
 export ZSH="$HOME/.oh-my-zsh"
 
 ZSH_THEME="robbyrussell"
+# ZSH_THEME="spaceship"
 
 plugins=(git)
 
@@ -41,8 +42,9 @@ export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 
 alias ls="exa"
 
+export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+
 # alias go="grc go"
-alias kctl="kubectl"
 
 # export PYENV_VIRTUALENV_DISABLE_PROMPT=1
 export PYENV_ROOT="$HOME/.pyenv"
@@ -61,3 +63,13 @@ source $HOME/.database.env
 eval "$(direnv hook zsh)"
 
 [ -s ~/.luaver/luaver ] && . ~/.luaver/luaver
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/home/paraizo/google-cloud-sdk/path.zsh.inc' ]; then . '/home/paraizo/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/home/paraizo/google-cloud-sdk/completion.zsh.inc' ]; then . '/home/paraizo/google-cloud-sdk/completion.zsh.inc'; fi
+
+# source <(kubectl completion zsh)
+# alias k="kubectl"
+# compdef __start_kubectl k

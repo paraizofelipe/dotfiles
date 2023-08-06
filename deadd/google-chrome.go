@@ -148,6 +148,13 @@ func main() {
 		return
 	}
 
+	// Google Mail
+	if strings.Contains(input.Body, "mail.google.com") && strings.Contains(input.Body, "href") {
+		if err, output = buildOutput(input, "google-mail.png"); err != nil {
+			log.Fatal(err)
+		}
+	}
+
 	// Google Calendar
 	if strings.Contains(input.Body, "calendar.google.com") && strings.Contains(input.Body, "href") {
 		if err, output = buildOutput(input, "google-calendar.png"); err != nil {
