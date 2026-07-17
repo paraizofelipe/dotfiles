@@ -1,0 +1,31 @@
+# Theme and colors
+
+# Color palette from Xresources
+set_from_resource $term_background background
+set_from_resource $term_foreground foreground
+set_from_resource $term_color0     color0
+set_from_resource $term_color1     color1
+set_from_resource $term_color2     color2
+set_from_resource $term_color3     color3
+set_from_resource $term_color4     color4
+set_from_resource $term_color5     color5
+set_from_resource $term_color6     color6
+set_from_resource $term_color7     color7
+set_from_resource $term_color8     color8
+set_from_resource $term_color9     color9
+set_from_resource $term_color10    color10
+set_from_resource $term_color11    color11
+set_from_resource $term_color12    color12
+set_from_resource $term_color13    color13
+set_from_resource $term_color14    color14
+set_from_resource $term_color15    color15
+
+# Window colors
+# class                     border      backgr.     text        indic.      child_border
+client.focused              $bg4        $blue        #ebdbb2     $bg4        $bg4
+client.focused_inactive     $darkgray   $bg0_s      $gray       #454948     $darkgray
+client.unfocused            $darkgray   $darkgray   $gray       #454948     $darkgray
+client.urgent               $red        $darkgray   #ebdbb2     $red        $red
+client.placeholder          #000000     #0c0c0c     #ffffff     #000000
+
+client.background           $bg

@@ -1,0 +1,28 @@
+# General settings
+
+# Default desktop layout (default is tiling)
+# workspace_layout tabbed <stacking|tabbed>
+
+# Configure border style <normal|1pixel|pixel xx|none|pixel>
+default_border pixel 2
+default_floating_border normal
+
+# Hide borders
+hide_edge_borders none
+
+# Change borders keybindings
+bindsym $mod+u border none
+bindsym $mod+y border pixel 1
+bindsym $mod+n border normal
+
+# Font for window titles
+font xft:URWGothic-Book 11
+
+# Use Mouse+$mod to drag floating windows
+floating_modifier $mod
+
+# Mouse warping
+mouse_warping none
+
+# Focus on click
+bindsym button1 focus
