@@ -52,16 +52,23 @@ notification-center:
   ### center anyways
   ignore-transient: false
 
+  ### Click behavior for notifications in the center
+  click-behavior:
+    ### The mouse button for dismissing a notification in the center
+    dismiss: mouse1
+    ### The mouse button for opening the default action
+    default-action: mouse3
+
   ### Custom buttons in notification center
   buttons:
     ### Numbers of buttons that can be drawn on a row of the notification
     ### center.
     # buttons-per-row: 5
 
-    ### Height of buttons in the notification center (in pixels).    
+    ### Height of buttons in the notification center (in pixels).
     # button-height: 60
 
-    ### Horizontal and vertical margin between each button in the 
+    ### Horizontal and vertical margin between each button in the
     ### notification center (in pixels).
     # button-margin: 2
 
@@ -89,7 +96,6 @@ notification:
   parse-html-entities: true
 
   dbus:
-
     ### If noti-closed messages are enabled, the sending application
     ### will know that a notification was closed/timed out. This can
     ### be an issue for certain applications, that overwrite
@@ -102,18 +108,16 @@ notification:
     send-noti-closed: false
 
   app-icon:
-
     ### If set to true: If no icon is passed by the app_icon parameter
     ### and no application "desktop-entry"-hint is present, deadd will
     ### try to guess the icon from the application name (if present).
     guess-icon-from-name: true
 
-    ### The display size of the application icons in the notification 
+    ### The display size of the application icons in the notification
     ### pop-ups and in the notification center
-    icon-size: 20
+    icon-size: 14
 
   image:
-
     ### The maximal display size of images that are part of
     ### notifications for notification pop-ups and in the notification
     ### center
@@ -130,72 +134,69 @@ notification:
   ### Each modification rule needs a "match" and either a "modify" or
   ### a "script" entry.
   modifications:
-  ### Match:
-  ### Matches the notifications against these rules. If all of the
-  ### values (of one modification rule) match, the "modify"/"script"
-  ### part is applied.
+    ### Match:
+    ### Matches the notifications against these rules. If all of the
+    ### values (of one modification rule) match, the "modify"/"script"
+    ### part is applied.
     - match:
         app-name: "Google Chrome"
       script: "~/.config/deadd/google-chrome"
+    # Configuração para Spotify Flatpak (app-name vazio)
+    # O script verifica se é realmente do Spotify via desktop-entry
+    - match:
+        app-name: ""
+      script: "~/.config/deadd/spotify-handler"
   # - match:
-      ### Possible match criteria:
-      # title: "Notification title"
-      # body: "Notification body"
-      # time: "12:44"
-      # app-name: "App name"
+  ### Possible match criteria:
+  # title: "Notification title"
+  # body: "Notification body"
+  # time: "12:44"
+  # app-name: "App name"
 
-    # modify:
-      ### Possible modifications
-      # title: "abc"
-      # body: "abc"
-      # app-name: "abc"
-      # app-icon: "file:///abc.png"
-      ### The timeout has three special values:
-      ### timeout: 0 -> don't time out at all
-      ### timeout: -1 -> use default timeout
-      ### timeout: 1 -> don't show as pop-up
-      ### timeout: >1 -> milliseconds until timeout
-      # timeout: 1
-      # margin-right: 10
-      # margin-top: 10
-      # image: "file:///abc.png"
-      # image-size: 10
-      # transient: true
-      # send-noti-closed: false
-      ### Remove action buttons from notifications
-      # remove-actions: true
-      ### Add a class-name to the notification container, that can be
-      ### used for specific styling of notifications using the
-      ### deadd.css file
-      # class-name: "abc"
+  # modify:
+  ### Possible modifications
+  # title: "abc"
+  # body: "abc"
+  # app-name: "abc"
+  # app-icon: "file:///abc.png"
+  ### The timeout has three special values:
+  ### timeout: 0 -> don't time out at all
+  ### timeout: -1 -> use default timeout
+  ### timeout: 1 -> don't show as pop-up
+  ### timeout: >1 -> milliseconds until timeout
+  # timeout: 1
+  # margin-right: 10
+  # margin-top: 10
+  # image: "file:///abc.png"
+  # image-size: 10
+  # transient: true
+  # send-noti-closed: false
+  ### Remove action buttons from notifications
+  # remove-actions: true
+  ### Add a class-name to the notification container, that can be
+  ### used for specific styling of notifications using the
+  ### deadd.css file
+  # class-name: "abc"
 
   # - match:
-      # app-name: "Chromium"
+  # app-name: "Chromium"
 
-    ### Instead of modifying a notification directly, a script can be
-    ### run, which will receive the notification as JSON on STDIN. It
-    ### is expected to return JSON/YAML configuration that defines the
-    ### modifications that should be applied. Minimum complete return
-    ### value must be '{"modify": {}, "match": {}}'. Always leave the "match"
-    ### object empty (technical reasons, i.e. I am lazy).
-    # script: "linux-notification-center-parse-chromium"
+  ### Instead of modifying a notification directly, a script can be
+  ### run, which will receive the notification as JSON on STDIN. It
+  ### is expected to return JSON/YAML configuration that defines the
+  ### modifications that should be applied. Minimum complete return
+  ### value must be '{"modify": {}, "match": {}}'. Always leave the "match"
+  ### object empty (technical reasons, i.e. I am lazy).
+  # script: "linux-notification-center-parse-chromium"
   # - match:
   #     app-name: "notify-send"
   #   modify:
   #     script: spotify
   # - match:
-  #     app-name: "libnotify-flatpak.com.spotify.Client-Spotify-1"
-  #   modify:
-  #     image-size: 80
-  #     timeout: 1
-  #     send-noti-closed: true
-  #     class-name: "Spotify"
-  # - match:
   #     title: Bildschirmhelligkeit
   #   modify:
   #     image-size: 60
   popup:
-
     ### Default timeout used for notifications in milli-seconds.  This can
     ### be overwritten with the "-t" option (or "--expire-time") of the
     ### notify-send command.
@@ -217,8 +218,7 @@ notification:
     # follow-mouse: false
 
     click-behavior:
-      
-      ### The mouse button for dismissing a popup. Must be either "mouse1", 
+      ### The mouse button for dismissing a popup. Must be either "mouse1",
       ### "mouse2", "mouse3", "mouse4", or "mouse5"
       dismiss: mouse1
 

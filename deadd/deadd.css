@@ -1,15 +1,15 @@
 .blurredBG, #main_window, .blurredBG.low, .blurredBG.normal {
-  background: rgba(40, 40, 40, 0.8);
+  background: #504945;
   color: #ebdbb2;
 }
 
 .title {
   font-weight: bold;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .body {
-  font-size: 12px
+  font-size: 11px
 }
 
 .button-close {
@@ -21,7 +21,7 @@
 }
 
 .appname {
-  font-size: 12px;
+  font-size: 10px;
 }
 
 .notificationInCenter {
@@ -30,9 +30,15 @@
   border-bottom: 2px solid rgba(255, 255, 255, 0.05);
 }
 
+.blurredBG.notification {
+      background: rgba(40, 40, 40, 0.90);
+      border: 1px solid #504945;
+      border-radius: 4px;
+  }
+
 .notification {
   padding: 0;
-  margin: 0;
+  margin: 2px 4px 2px 4px;
 }
 
 .notification button,
@@ -50,15 +56,15 @@ button {
 
 button:hover {
   color: rgb(40, 42, 54);
-  background: #98971a;
+  background: #504945;
 }
 
 .blurredBG.notification.critical {
-  background: rgba(204, 36, 29, 0.8);
+    background: #282828;
 }
 
 .notificationInCenter.critical {
-  background: rgba(204, 36, 29, 0.8);
+    background: #282828;
 }
 
 label.deadd-noti-center.noti-center.time {

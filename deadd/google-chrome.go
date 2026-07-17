@@ -11,6 +11,13 @@ import (
 	"strings"
 )
 
+func init() {
+	logFile, err := os.OpenFile("/tmp/deadd-chrome-debug.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err == nil {
+		log.SetOutput(logFile)
+	}
+}
+
 const APP_ICON_NAME string = "google-chrome"
 const IMAGE_SIZE int = 70
 
@@ -36,13 +43,13 @@ type Input struct {
 
 type Output struct {
 	Modify struct {
-		AppIcon       string `json:"app-icon"`
-		AppName       string `json:"app-name"`
-		ImageSize     int    `json:"image-size"`
-		Image         string `json:"image"`
-		RemoveActions bool   `json:"remove-actions"`
-		ClassName     string `json:"class-name"`
-		Body          string `json:"body"`
+		AppIcon       string `json:"app-icon,omitempty"`
+		AppName       string `json:"app-name,omitempty"`
+		ImageSize     int    `json:"image-size,omitempty"`
+		Image         string `json:"image,omitempty"`
+		RemoveActions bool   `json:"remove-actions,omitempty"`
+		ClassName     string `json:"class-name,omitempty"`
+		Body          string `json:"body,omitempty"`
 	} `json:"modify"`
 	Match struct {
 	} `json:"match"`
@@ -89,31 +96,47 @@ func clearString(str string) (err error, r string) {
 }
 
 func handlerImage(originImagePath string, imageName string) (dstImagePath string) {
-	var (
-		err         error
-		currentPath string
-		tmpPath     string = fmt.Sprintf("/tmp/%s", imageName)
-	)
+	var currentPath string
+	tmpPath := fmt.Sprintf("/tmp/%s", imageName)
 
-	if strings.Contains(originImagePath, "NamedIcon") {
-		currentPath = strings.Split(originImagePath, " ")[1]
-		currentPath = strings.ReplaceAll(currentPath, "\\", "")
-		currentPath = strings.ReplaceAll(currentPath, "\"", "")
-
-		if err = MoveFile(currentPath, tmpPath); err != nil {
-			log.Fatal(err)
+	switch {
+	case strings.HasPrefix(originImagePath, "NamedIcon"):
+		parts := strings.SplitN(originImagePath, " ", 2)
+		if len(parts) < 2 {
+			return
 		}
-		dstImagePath = fmt.Sprintf("file:///%s", tmpPath)
+		currentPath = strings.ReplaceAll(strings.ReplaceAll(parts[1], "\\", ""), "\"", "")
+
+	case strings.HasPrefix(originImagePath, "FilePath"):
+		parts := strings.SplitN(originImagePath, " ", 2)
+		if len(parts) < 2 {
+			return
+		}
+		currentPath = strings.TrimSpace(strings.ReplaceAll(parts[1], "\"", ""))
+
+	case strings.HasPrefix(originImagePath, "/"):
+		currentPath = originImagePath
+
+	case strings.HasPrefix(originImagePath, "file:///"):
+		dstImagePath = originImagePath
+		return
 	}
 
+	if currentPath == "" {
+		return
+	}
+
+	if err := MoveFile(currentPath, tmpPath); err != nil {
+		log.Printf("ERROR moving image %s -> %s: %v", currentPath, tmpPath, err)
+		return
+	}
+	dstImagePath = fmt.Sprintf("file:///%s", tmpPath)
 	return
 }
 
 func buildOutput(input Input, imageName string) (err error, output Output) {
-	if err, output.Modify.Body = clearString(output.Modify.Body); err != nil {
-		log.Fatal(err)
-	}
-	output.Modify.Body = strings.TrimRight(input.Body, input.Body[:60])
+	// Removido: truncagem do body
+	// Mantém body original completo para exibir no notification center
 
 	output.Modify.ImageSize = IMAGE_SIZE
 	output.Modify.AppIcon = APP_ICON_NAME
@@ -142,31 +165,30 @@ func main() {
 
 	strJson = strings.ReplaceAll(strJson, "\\\\", "\\")
 
+	log.Printf("INPUT: %s\n", strJson)
+
 	err = json.Unmarshal([]byte(strJson), &input)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 
-	// Google Mail
-	if strings.Contains(input.Body, "mail.google.com") && strings.Contains(input.Body, "href") {
-		if err, output = buildOutput(input, "google-mail.png"); err != nil {
-			log.Fatal(err)
-		}
+	log.Printf("IMAGE FIELD: %s\n", input.Image)
+
+	imageName := "google-chrome-notification.png"
+	switch {
+	case strings.Contains(input.Body, "mail.google.com"):
+		imageName = "google-mail.png"
+	case strings.Contains(input.Body, "calendar.google.com"):
+		imageName = "google-calendar.png"
+	case strings.Contains(input.Body, "meet.google.com"):
+		imageName = "google-meet.png"
+	case strings.Contains(input.Body, "chat.google.com"):
+		imageName = "google-chat.png"
 	}
 
-	// Google Calendar
-	if strings.Contains(input.Body, "calendar.google.com") && strings.Contains(input.Body, "href") {
-		if err, output = buildOutput(input, "google-calendar.png"); err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	// Google Meet
-	if strings.Contains(input.Body, "meet.google.com") && strings.Contains(input.Body, "href") {
-		if err, output = buildOutput(input, "google-meet.png"); err != nil {
-			log.Fatal(err)
-		}
+	if err, output = buildOutput(input, imageName); err != nil {
+		log.Fatal(err)
 	}
 
 	fmt.Println(output)

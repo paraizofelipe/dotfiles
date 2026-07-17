@@ -1,0 +1,35 @@
+#!/bin/bash
+# Script para processar notificações do Spotify Flatpak
+# Recebe JSON via STDIN e retorna modificações em JSON/YAML
+
+# Lê o JSON da notificação
+input=$(cat)
+
+# Debug: salvar input recebido
+echo "$input" >> /tmp/deadd-spotify-debug.log
+date >> /tmp/deadd-spotify-debug.log
+echo "---" >> /tmp/deadd-spotify-debug.log
+
+# Verifica se é do Spotify:
+# - appname vazio
+# - icon é "NoImage"
+# - tem uma imagem (RawImg)
+if echo "$input" | grep -q '"appname":""' && \
+   echo "$input" | grep -q '"icon":"NoImage"' && \
+   echo "$input" | grep -q '"image":"RawImg'; then
+  # É do Spotify, adiciona app-name e app-icon
+  echo "MATCH SPOTIFY!" >> /tmp/deadd-spotify-debug.log
+  cat << 'EOF'
+{
+  "match": {},
+  "modify": {
+    "app-name": "Spotify",
+    "app-icon": "com.spotify.Client"
+  }
+}
+EOF
+else
+  # Não é do Spotify, não modifica nada
+  echo "NOT SPOTIFY" >> /tmp/deadd-spotify-debug.log
+  echo '{"match": {}, "modify": {}}'
+fi
