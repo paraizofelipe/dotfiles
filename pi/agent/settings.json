@@ -1,0 +1,19 @@
+{
+    "lastChangelogVersion": "0.80.3",
+    "defaultProvider": "openai-codex",
+    "defaultModel": "gpt-5.5",
+    "packages": [
+        "npm:pi-mcp-adapter",
+        "npm:pi-web-access",
+        "npm:@hypabolic/pi-hypa",
+        "npm:@ifi/oh-pi-themes",
+        "npm:pi-powerline",
+        "npm:@firstpick/pi-extension-git-footer-status",
+        "npm:@tintinweb/pi-subagents",
+        "npm:@juicesharp/rpiv-ask-user-question",
+        "npm:@sherif-fanous/pi-rtk"
+    ],
+    "theme": "gruvbox-dark",
+    "defaultThinkingLevel": "medium"
+}
+
