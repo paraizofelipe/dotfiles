@@ -1,2 +1,15 @@
 *.deb
 tmux/plugins
+launch.json
+pyrightconfig.json
+.envrc
+.python-version
+.ruff.toml
+.formatter
+AGENTS.md
+GEMINI.md
+CLAUDE.md
+.opencode/
+__pycache__/
+*.pyc
+*.backup
