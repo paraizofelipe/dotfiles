@@ -10,7 +10,8 @@ Adicionar um módulo na polybar, à direita do `module/vial`, que mostra um íco
 cérebro () colorido pela utilização de IA. Ao clicar, abre um modal no canto
 superior esquerdo da tela (logo abaixo da barra) com as barras de consumo dos
 providers **Claude Code**, **Codex** e **OpenRouter**, incluindo a utilização atual,
-o limite semanal, horários de reset e dados da última request. O modal tem botão de
+o limite semanal, horários de reset e dados da última request. O card **MIA
+(Luizalabs)** entrou depois, com o consumo do mês no gateway LiteLLM corporativo. O modal tem botão de
 refresh.
 
 ## Princípios
@@ -90,7 +91,28 @@ homogênea:
 - `resets_at` vem como epoch (segundos) → converter para ISO/relativo.
 - Erro: sem arquivos de sessão → `error = "sem dados locais do Codex"`.
 
-**3. OpenRouter** — `GET https://openrouter.ai/api/v1/credits`
+**3. MIA (Luizalabs)** — `GET {base_url}/key/info` + `GET {base_url}/user/daily/activity`
+- Gateway LiteLLM corporativo. Virtual key e `base_url` vêm de
+  `~/.mia/credentials.json` (CLI `mia`); com `expires_at` vencido, `mia status`
+  revalida a sessão e reescreve o arquivo antes das chamadas.
+- Header: `Authorization: Bearer <litellm_key>`.
+- Barras: o gateway hoje não publica teto — `max_budget` vem nulo na key, no
+  usuário e no time, e os endpoints de budget exigem papel de admin. Sem
+  denominador não há percentual honesto, então a barra usa **teto local**:
+  `MIA_MONTHLY_BUDGET` (env, lida também dos `ENV_FILES` como a chave do
+  OpenRouter) sobre o gasto do mês, com reset na virada do mês (label
+  "Budget (mês)"). Se a key passar a ter `max_budget`, ela tem **precedência** por
+  ser a fonte de verdade (label "Budget (<budget_duration>)", reset em
+  `budget_reset_at`). Sem teto e sem `/user/daily/activity`, nenhuma barra — o card
+  vive de `info` em vez de exibir 0% falso.
+- `info`: gasto e tokens/requests do mês corrente
+  (`/user/daily/activity?start_date=<1º do mês>&end_date=<hoje>` → `metadata`) e o
+  tempo restante da sessão (`info.expires` do `/key/info`).
+- Erros: HTTP 401/403 → `"sessão expirada — rode `mia auth`"`; sem credenciais →
+  `"credenciais do MIA não encontradas — rode `mia auth`"`. Falha só no
+  `/user/daily/activity` degrada para o card sem as linhas de consumo.
+
+**4. OpenRouter** — `GET https://openrouter.ai/api/v1/credits`
 - Header: `Authorization: Bearer $OPENROUTER_API_KEY` (env).
 - Resposta: `{ data: { total_credits, total_usage } }`.
 - `info`: "Créditos disponíveis: {total_credits - total_usage:.2f}".
@@ -151,6 +173,7 @@ modules-right = pulseaudio xkeyboard vial ai-usage wlan bluetooth opendeck netsk
 | Token OAuth do Claude expirado (401) | Card Claude: "token expirado — rode o Claude Code". Barra segue normal. |
 | Sem `OPENROUTER_API_KEY` | Card OpenRouter: "sem OPENROUTER_API_KEY". |
 | Sem logs do Codex | Card Codex: "sem dados locais do Codex". |
+| Sessão MIA expirada (401/403) | Card MIA: "sessão expirada — rode `mia auth`". |
 | Erro de rede no `fetch` | Mantém o último valor do cache + indica que está desatualizado. |
 | Qualquer erro no `poll` | Ainda imprime o ícone de cérebro (cor neutra/foreground). |
 
