@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Módulo polybar de utilização de IA (Claude Code, Codex, GitHub Copilot, OpenRouter).
+"""Módulo polybar de utilização de IA (Claude Code, Codex, OpenRouter).
 
 Standalone — apenas a stdlib do Python 3. Subcomandos: poll | fetch | show.
 """
@@ -41,16 +41,6 @@ CLAUDE_CREDENTIALS = os.path.expanduser("~/.claude/.credentials.json")
 CLAUDE_PROJECTS = os.path.expanduser("~/.claude/projects")
 CODEX_AUTH = os.path.expanduser("~/.codex/auth.json")
 CODEX_USAGE_URL = "https://chatgpt.com/backend-api/wham/usage"
-# Copilot: o token OAuth do GitHub (ghu_/gho_) em texto plano. O auth.db do
-# Copilot CLI guarda o token CRIPTOGRAFADO (BLOB), então lemos das fontes em
-# texto plano: o cache do litellm e, em outros setups, o apps.json/hosts.json
-# de editores (copilot.lua, etc.).
-COPILOT_TOKEN_FILE = os.path.expanduser("~/.config/litellm/github_copilot/access-token")
-COPILOT_APPS_FILES = [
-    os.path.expanduser("~/.config/github-copilot/apps.json"),
-    os.path.expanduser("~/.config/github-copilot/hosts.json"),
-]
-COPILOT_USAGE_URL = "https://api.github.com/copilot_internal/user"
 # A polybar não herda o env do shell interativo (~/.zshrc); por isso lemos
 # variáveis sensíveis também destes arquivos de env, se necessário.
 ENV_FILES = [os.path.expanduser("~/.use.env"), os.path.expanduser("~/.user.env")]
@@ -92,22 +82,34 @@ def _to_datetime(value):
     return dt
 
 
-def relative_reset(value, now=None):
+def seconds_until(value, now=None):
+    """Segundos até `value` (ISO8601 ou epoch); negativo se já passou. None se
+    a data for inválida ou ausente."""
     dt = _to_datetime(value)
     if dt is None:
-        return ""
-    now = now or datetime.now(timezone.utc)
-    secs = int((dt - now).total_seconds())
-    if secs <= 0:
-        return "reset agora"
-    days, rem = divmod(secs, 86400)
+        return None
+    return int((dt - (now or datetime.now(timezone.utc))).total_seconds())
+
+
+def humanize_delta(secs):
+    """Duração curta em pt-BR: '2d 20h', '3h 30m' ou '12m'."""
+    days, rem = divmod(max(int(secs), 0), 86400)
     hours, rem = divmod(rem, 3600)
     mins, _ = divmod(rem, 60)
     if days > 0:
-        return f"reset em {days}d {hours}h"
+        return f"{days}d {hours}h"
     if hours > 0:
-        return f"reset em {hours}h {mins}m"
-    return f"reset em {mins}m"
+        return f"{hours}h {mins}m"
+    return f"{mins}m"
+
+
+def relative_reset(value, now=None):
+    secs = seconds_until(value, now)
+    if secs is None:
+        return ""
+    if secs <= 0:
+        return "reset agora"
+    return f"reset em {humanize_delta(secs)}"
 
 
 def extract_env_value(text, name):
@@ -198,54 +200,6 @@ def parse_openrouter_credits(payload):
         "bars": [{"label": "Créditos usados", "percent": percent, "resets_at": None}],
         "info": [f"Disponível: ${available:.2f} de ${total:.2f}"],
     }
-
-
-def _copilot_quota_bar(label, snap, reset):
-    """Barra de uma cota do Copilot, ou None se for ilimitada/inexistente.
-
-    `snap` é um item de `quota_snapshots` (chat/completions/premium_interactions).
-    `unlimited` indica cota infinita (planos pagos costumam ter chat/completions
-    assim). Caso contrário há um teto real e a barra mostra o quanto foi USADO
-    (`100 - percent_remaining`). Atenção: `has_quota` reflete se ainda SOBRA cota
-    — ele vira false quando o limite se esgota, então NÃO decide se há barra.
-    """
-    if not snap or snap.get("unlimited"):
-        return None
-    used = 100.0 - float(snap.get("percent_remaining") or 0)
-    return {"label": label, "percent": used, "resets_at": reset}
-
-
-def parse_copilot_usage(payload):
-    """Resposta de https://api.github.com/copilot_internal/user.
-
-    `quota_snapshots` traz `premium_interactions`, `chat` e `completions`, cada
-    um com `unlimited`, `has_quota` e `percent_remaining`. `quota_reset_date`
-    (ex.: "2026-07-01") é o reset mensal. Planos pagos costumam ter chat e
-    completions ilimitados; o que tem cota mensal são as premium interactions.
-    """
-    snaps = payload.get("quota_snapshots") or {}
-    reset = payload.get("quota_reset_date")
-    bars, info = [], []
-    plan = payload.get("copilot_plan")
-    if plan:
-        info.append(f"Plano: {plan}")
-    prem = snaps.get("premium_interactions") or {}
-    prem_bar = _copilot_quota_bar("Premium (mês)", prem, reset)
-    if prem_bar:
-        bars.append(prem_bar)
-        ent = int(prem.get("entitlement") or 0)
-        if ent:
-            used = ent - int(prem.get("remaining") or 0)
-            info.append(f"Premium: {used} de {ent} usados")
-    elif prem.get("unlimited"):
-        info.append("Premium: ilimitado")
-    # chat/completions: só viram barra quando há cota (contas free); em planos
-    # pagos são ilimitados e não poluem o modal.
-    for key, label in (("chat", "Chat"), ("completions", "Completions")):
-        bar = _copilot_quota_bar(label, snaps.get(key) or {}, reset)
-        if bar:
-            bars.append(bar)
-    return {"ok": True, "error": None, "bars": bars, "info": info}
 
 
 # ---------------------------------------------------------------- Coletores de IO
@@ -347,69 +301,9 @@ def collect_openrouter():
     return parse_openrouter_credits(payload)
 
 
-def extract_copilot_oauth(apps_json_text):
-    """Extrai um `oauth_token` de um JSON no formato apps.json/hosts.json do
-    Copilot (`{"github.com:Iv1.x": {"oauth_token": "..."}}`). None se não achar."""
-    try:
-        data = json.loads(apps_json_text)
-    except (json.JSONDecodeError, TypeError):
-        return None
-    if not isinstance(data, dict):
-        return None
-    for entry in data.values():
-        if isinstance(entry, dict) and entry.get("oauth_token"):
-            return entry["oauth_token"]
-    return None
-
-
-def copilot_oauth_token():
-    """Token OAuth do GitHub para o Copilot, em texto plano. Tenta o cache do
-    litellm e, depois, o apps.json/hosts.json de editores. None se nada existir."""
-    try:
-        with open(COPILOT_TOKEN_FILE, encoding="utf-8") as f:
-            tok = f.read().strip()
-        if tok:
-            return tok
-    except OSError:
-        pass
-    for path in COPILOT_APPS_FILES:
-        try:
-            with open(path, encoding="utf-8") as f:
-                tok = extract_copilot_oauth(f.read())
-        except OSError:
-            continue
-        if tok:
-            return tok
-    return None
-
-
-def collect_copilot():
-    token = copilot_oauth_token()
-    if not token:
-        return _err("credenciais do Copilot não encontradas")
-    # O endpoint copilot_internal exige cabeçalhos de editor; sem eles dá 403.
-    headers = {
-        "Authorization": f"token {token}",
-        "User-Agent": "GitHubCopilotChat/0.26.0",
-        "Editor-Version": "vscode/1.99.0",
-        "Editor-Plugin-Version": "copilot-chat/0.26.0",
-        "Accept": "application/json",
-    }
-    try:
-        payload = _http_get_json(COPILOT_USAGE_URL, headers)
-    except urllib.error.HTTPError as exc:
-        if exc.code in (401, 403):
-            return _err("token expirado — rode o copilot/gh")
-        return _err(f"erro HTTP {exc.code}")
-    except (urllib.error.URLError, TimeoutError, OSError):
-        return _err("sem conexão")
-    return parse_copilot_usage(payload)
-
-
 PROVIDERS = [
     ("Anthropic", collect_claude),
     ("OpenAI", collect_codex),
-    ("GitHub Copilot", collect_copilot),
     ("OpenRouter", collect_openrouter),
 ]
 

@@ -44,6 +44,25 @@ class TestHelpers(unittest.TestCase):
         self.assertEqual(
             ai_usage.relative_reset("2026-06-17T11:00:00+00:00", now), "reset agora")
 
+    def test_humanize_delta_days_hours_minutes(self):
+        self.assertEqual(ai_usage.humanize_delta(2 * 86400 + 3600), "2d 1h")
+        self.assertEqual(ai_usage.humanize_delta(3 * 3600 + 30 * 60), "3h 30m")
+        self.assertEqual(ai_usage.humanize_delta(12 * 60), "12m")
+
+    def test_humanize_delta_clamps_negative(self):
+        self.assertEqual(ai_usage.humanize_delta(-500), "0m")
+
+    def test_seconds_until_future_and_past(self):
+        now = datetime(2026, 9, 14, 12, 0, 0, tzinfo=timezone.utc)
+        self.assertEqual(
+            ai_usage.seconds_until("2026-09-14T13:00:00+00:00", now), 3600)
+        self.assertEqual(
+            ai_usage.seconds_until("2026-09-14T11:00:00+00:00", now), -3600)
+
+    def test_seconds_until_invalid(self):
+        self.assertIsNone(ai_usage.seconds_until(None))
+        self.assertIsNone(ai_usage.seconds_until("not-a-date"))
+
     def test_relative_reset_invalid(self):
         self.assertEqual(ai_usage.relative_reset(None), "")
         self.assertEqual(ai_usage.relative_reset("not-a-date"), "")
@@ -70,29 +89,6 @@ class TestParsers(unittest.TestCase):
         "rate_limit": {"primary_window": None, "secondary_window": None},
         "credits": {"has_credits": False, "unlimited": False, "balance": "0"},
     }
-    COPILOT_LIMITED = {
-        "copilot_plan": "individual",
-        "quota_reset_date": "2026-07-01",
-        "quota_snapshots": {
-            "premium_interactions": {"unlimited": False, "has_quota": True,
-                                     "percent_remaining": 40.0,
-                                     "entitlement": 300, "remaining": 120},
-            "chat": {"unlimited": False, "has_quota": True, "percent_remaining": 90.0},
-            "completions": {"unlimited": True, "has_quota": True, "percent_remaining": 100.0},
-        },
-    }
-    COPILOT_BUSINESS = {
-        "copilot_plan": "business",
-        "quota_reset_date": "2026-07-01",
-        "quota_snapshots": {
-            "premium_interactions": {"unlimited": False, "has_quota": False,
-                                     "percent_remaining": 0.0,
-                                     "entitlement": 3000, "remaining": 0},
-            "chat": {"unlimited": True, "has_quota": True, "percent_remaining": 100.0},
-            "completions": {"unlimited": True, "has_quota": True, "percent_remaining": 100.0},
-        },
-    }
-
     def test_parse_claude_usage(self):
         r = ai_usage.parse_claude_usage(self.CLAUDE)
         self.assertTrue(r["ok"])
@@ -123,27 +119,6 @@ class TestParsers(unittest.TestCase):
         self.assertAlmostEqual(r["bars"][0]["percent"], 84.74115602, places=4)
         self.assertEqual(r["info"], ["Disponível: $15.26 de $100.00"])
 
-    def test_parse_copilot_usage_limited(self):
-        r = ai_usage.parse_copilot_usage(self.COPILOT_LIMITED)
-        self.assertTrue(r["ok"])
-        # premium e chat têm cota; completions é ilimitado → sem barra
-        self.assertEqual([b["label"] for b in r["bars"]], ["Premium (mês)", "Chat"])
-        self.assertEqual(r["bars"][0]["percent"], 60.0)   # 100 - 40
-        self.assertEqual(r["bars"][0]["resets_at"], "2026-07-01")
-        self.assertEqual(r["bars"][1]["percent"], 10.0)   # 100 - 90
-        self.assertIn("Plano: individual", r["info"])
-        self.assertIn("Premium: 180 de 300 usados", r["info"])  # 300 - 120
-
-    def test_parse_copilot_usage_business_premium_exhausted(self):
-        # premium com teto real esgotado (has_quota=false = sem cota SOBRANDO,
-        # não 'sem cota'): barra em 100%, mesmo com chat/completions ilimitados.
-        r = ai_usage.parse_copilot_usage(self.COPILOT_BUSINESS)
-        self.assertTrue(r["ok"])
-        self.assertEqual([b["label"] for b in r["bars"]], ["Premium (mês)"])
-        self.assertEqual(r["bars"][0]["percent"], 100.0)
-        self.assertEqual(r["bars"][0]["resets_at"], "2026-07-01")
-        self.assertIn("Plano: business", r["info"])
-        self.assertIn("Premium: 3000 de 3000 usados", r["info"])
 
 
 class TestPoll(unittest.TestCase):
@@ -166,12 +141,11 @@ class TestPoll(unittest.TestCase):
         }}
         self.assertEqual(ai_usage.worst_percent(data), 9)
 
-    def test_worst_percent_includes_copilot(self):
-        data = {"providers": {
-            "Anthropic": {"ok": True, "bars": [{"percent": 9}]},
-            "GitHub Copilot": {"ok": True, "bars": [{"percent": 60}]},  # conta na cor
-        }}
-        self.assertEqual(ai_usage.worst_percent(data), 60)
+    def test_providers_exclude_mia_and_copilot(self):
+        # MIA e GitHub Copilot foram removidos: não podem voltar ao modal
+        names = [name for name, _fn in ai_usage.PROVIDERS]
+        self.assertEqual(names, ["Anthropic", "OpenAI", "OpenRouter"])
+
 
 
 class TestEnvVar(unittest.TestCase):
@@ -187,18 +161,6 @@ class TestEnvVar(unittest.TestCase):
 
     def test_extract_absent(self):
         self.assertIsNone(ai_usage.extract_env_value("NADA=1\n", "OPENROUTER_API_KEY"))
-
-
-class TestCopilotToken(unittest.TestCase):
-    def test_extract_oauth_from_apps_json(self):
-        text = ('{"github.com:Iv1.abc": {"user": "u", "oauth_token": "gho_secret"}}')
-        self.assertEqual(ai_usage.extract_copilot_oauth(text), "gho_secret")
-
-    def test_extract_oauth_absent(self):
-        self.assertIsNone(ai_usage.extract_copilot_oauth('{"github.com": {"user": "u"}}'))
-
-    def test_extract_oauth_invalid_json(self):
-        self.assertIsNone(ai_usage.extract_copilot_oauth("not json"))
 
 
 class TestMonitor(unittest.TestCase):
