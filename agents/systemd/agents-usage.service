@@ -1,0 +1,6 @@
+[Unit]
+Description=Atualiza o uso dos agentes de IA (painel/polybar)
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/agents usage-update --if-due

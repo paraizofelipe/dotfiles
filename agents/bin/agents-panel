@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Abre/fecha o painel de agentes (clique no ícone do polybar).
+AGENTS_DIR=$(dirname "$(dirname "$(readlink -f "$0")")")
+PYTHON="${XDG_DATA_HOME:-$HOME/.local/share}/agents/venv/bin/python"
+if [[ ! -x "$PYTHON" ]]; then
+  notify-send -a Agents "Painel de agentes" "venv ausente: rode ./install.sh no dotfiles" 2>/dev/null
+  exit 1
+fi
+exec "$PYTHON" "$AGENTS_DIR/panel/main.py" "$@"

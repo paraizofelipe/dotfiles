@@ -30,6 +30,8 @@ for_window [class="Xfburn"] floating enable
 for_window [class="Blueman-manager"] floating enable, resize set 100 px 600 px, move position center, border normal
 for_window [class="Nm-connection-editor"] floating enable, resize set 100 px 600 px, move position center, border normal
 for_window [class="action-ring"] border none
+for_window [title="^agents-panel$"] floating enable, sticky enable, border none
+for_window [class="agents-login"] floating enable, resize set 900 px 500 px, move position center
 
 # Switch to workspace with urgent window automatically
 for_window [urgent=latest] focus

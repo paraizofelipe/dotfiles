@@ -1,0 +1,182 @@
+#!/usr/bin/env python3
+"""CLI do painel de agentes.
+
+  agents usage-update [--if-due] | usage-show
+  agents bar                    ícone do polybar (lê só o cache)
+  agents launch                 abre o agente padrão num terminal
+  agents account list [provider]
+  agents account add [provider] <nome>
+  agents account use [provider] <conta>
+  agents account login [provider] <conta>
+  agents account rename [provider] <conta> <nome>
+  agents account remove [provider] <conta> [--yes]
+  agents account mode [provider] auto|notify [threshold]
+
+<conta> aceita id, nome ou posição (1, 2...). Sem provider, usa o padrão (claude).
+"""
+import json
+import os
+import subprocess
+import sys
+import time
+
+AGENTS_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+sys.path.insert(0, AGENTS_DIR)
+
+from agents_usage import accounts, alerts, common, update, view  # noqa: E402
+
+PRIVATE_BROWSER = os.path.join(AGENTS_DIR, "bin", "agents-private-browser")
+TERMINAL = os.environ.get("AGENTS_TERMINAL", "alacritty")
+ROBOT = "\uf544"  # Font Awesome 5 Solid, já carregada no polybar
+
+
+def cmd_bar():
+    usage = common.read_json(common.USAGE_FILE, {}) or {}
+    model = view.build(usage, accounts.load_registry())
+    worst = model["worst"]
+    color = view.COLORS["none"] if model["outdated"] else worst["color"]
+    label = f" {worst['percent']:.0f}%" if worst["severity"] in ("medium", "high") else ""
+    print(f"%{{F{color}}}{ROBOT}{label}%{{F-}}")
+    return 0
+
+
+def cmd_launch():
+    """Agente padrão num terminal; zsh -i para herdar o PATH com os shims."""
+    provider = accounts.load_registry()["default_provider"]
+    subprocess.Popen([TERMINAL, "-e", "zsh", "-ic", provider], start_new_session=True,
+                     stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    return 0
+
+
+def split_provider(args, registry):
+    if args and args[0] in accounts.MULTI_ACCOUNT_PROVIDERS:
+        return args[0], args[1:]
+    return registry["default_provider"], args
+
+
+def limits_summary(record):
+    if not record:
+        return "sem dados"
+    if record["status"] != common.OK and not record.get("stale"):
+        return record.get("error") or record["status"]
+    parts = [f"{lim['label']} {lim['percent']:.0f}%" for lim in record["limits"]]
+    return "  ".join(parts) or "sem limites"
+
+
+def cmd_list(args, registry):
+    usage = common.read_json(common.USAGE_FILE, {}) or {}
+    records = {(r["provider"], r["account"]): r for r in usage.get("accounts", [])}
+    providers = args[:1] or list(accounts.MULTI_ACCOUNT_PROVIDERS)
+    for provider in providers:
+        entry = registry[provider]
+        print(f"{provider} (modo {entry['mode']}, limite {entry['threshold']}%)")
+        for pos, acc in enumerate(accounts.accounts_for(provider, registry), 1):
+            mark = "*" if acc["active"] else " "
+            print(f" {mark} {pos}. {acc['label']:<12} [{acc['id']}]  "
+                  f"{limits_summary(records.get((provider, acc['id'])))}")
+
+
+def run_login(provider, account):
+    argv, env = accounts.login_command(provider, account, browser=PRIVATE_BROWSER)
+    if account["id"] != "main":
+        print("Faça login na janela privada como a conta que está adicionando.")
+    return subprocess.call(argv, env=env)
+
+
+def cmd_account(args):
+    registry = accounts.load_registry()
+    sub, rest = (args[0], args[1:]) if args else ("list", [])
+    if sub == "list":
+        cmd_list(rest, registry)
+        return 0
+    provider, rest = split_provider(rest, registry)
+    if sub == "add" and len(rest) == 1:
+        account = accounts.add_account(provider, rest[0])
+        print(f"Conta '{account['label']}' criada em {account['home']}")
+        return run_login(provider, account)
+    if sub == "use" and len(rest) == 1:
+        account = accounts.use_account(provider, rest[0])
+        print(f"{provider}: conta ativa agora é '{account['label']}'. "
+              "Sessões já abertas continuam na conta anterior.")
+        return 0
+    if sub == "login" and len(rest) == 1:
+        return run_login(provider, accounts.find_account(registry, provider, rest[0]))
+    if sub == "rename" and len(rest) == 2:
+        account = accounts.rename_account(provider, rest[0], rest[1])
+        print(f"Renomeada para '{account['label']}'")
+        return 0
+    if sub == "mode" and rest and rest[0] in ("auto", "notify"):
+        threshold = int(rest[1]) if len(rest) > 1 and rest[1].isdigit() else None
+        entry = accounts.set_mode(provider, rest[0], threshold)
+        print(f"{provider}: modo {entry['mode']}, limite {entry['threshold']}%")
+        return 0
+    if sub == "remove" and rest:
+        account = accounts.find_account(registry, provider, rest[0])
+        if "--yes" not in rest[1:]:
+            if not sys.stdin.isatty():
+                raise accounts.AccountError("use --yes para remover sem terminal interativo")
+            answer = input(f"Remover '{account['label']}' e suas credenciais locais? [s/N] ")
+            if answer.strip().lower() not in ("s", "sim", "y", "yes"):
+                print("Cancelado.")
+                return 1
+        accounts.remove_account(provider, account["id"])
+        print(f"Conta '{account['label']}' removida.")
+        return 0
+    print(__doc__, file=sys.stderr)
+    return 2
+
+
+def cmd_usage_update(args):
+    registry = accounts.load_registry()
+    if "--if-due" in args:
+        previous = common.read_json(common.USAGE_FILE, {}) or {}
+        interval = alerts.next_interval(previous.get("accounts", []), registry)
+        # folga de 30s: o timer de 3 min não pode "perder" a rodada de 15 min por jitter
+        if time.time() - previous.get("updated_at", 0) < interval - 30:
+            return 0
+    data = update.run(registry=registry)
+    actions = alerts.decide(data["accounts"], registry)
+    alerts.apply(actions, os.path.realpath(__file__))
+    if sys.stdout.isatty():
+        print("\n".join(f"{r['provider']}/{r['account']}: {r['status']}" for r in data["accounts"]))
+    return 0
+
+
+def cmd_notify_switch(args):
+    """Interno: notificação com botão que troca a conta (disparada pelos alertas)."""
+    provider, account_id, title, body = args
+    label = accounts.find_account(accounts.load_registry(), provider, account_id)["label"]
+    if alerts.wait_for_action(title, body, f"Usar {label}"):
+        accounts.use_account(provider, account_id)
+        alerts.notify(title.split(":")[0], f"Conta ativa agora é {label}.")
+    return 0
+
+
+def main(argv):
+    cmd, args = (argv[1], argv[2:]) if len(argv) > 1 else ("", [])
+    try:
+        if cmd == "usage-update":
+            return cmd_usage_update(args)
+        if cmd == "bar":
+            return cmd_bar()
+        if cmd == "launch":
+            return cmd_launch()
+        if cmd == "notify-switch" and len(args) == 4:
+            return cmd_notify_switch(args)
+        if cmd == "usage-show":
+            data = common.read_json(common.USAGE_FILE, {}) or {}
+            age = time.time() - data.get("updated_at", 0)
+            print(json.dumps(data, indent=2))
+            print(f"# atualizado há {age:.0f}s", file=sys.stderr)
+            return 0
+        if cmd == "account":
+            return cmd_account(args)
+    except accounts.AccountError as exc:
+        print(f"agents: {exc}", file=sys.stderr)
+        return 1
+    print(__doc__, file=sys.stderr)
+    return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

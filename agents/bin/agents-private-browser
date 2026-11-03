@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# BROWSER usado no login de contas extras: abre a URL numa janela privada para
+# não reaproveitar a conta já logada no navegador.
+set -euo pipefail
+url="${1:?uso: agents-private-browser <url>}"
+default=$(xdg-settings get default-web-browser 2>/dev/null || true)
+case "$default" in
+  *firefox*) exec firefox --private-window "$url" ;;
+  *brave*) exec brave-browser --incognito "$url" ;;
+  *chromium*) exec chromium --incognito "$url" ;;
+  *chrome*) exec google-chrome --incognito "$url" ;;
+esac
+for cmd in google-chrome chromium brave-browser; do
+  command -v "$cmd" >/dev/null && exec "$cmd" --incognito "$url"
+done
+command -v firefox >/dev/null && exec firefox --private-window "$url"
+echo "Abra numa janela privada: $url" >&2

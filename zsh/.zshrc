@@ -204,3 +204,7 @@ case ":$PATH:" in
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 # pnpm end
+
+# Painel de agentes: shims de claude/codex que aplicam a conta ativa
+# (agents account use). Precisa vir depois de ~/.local/bin, onde estão os CLIs reais.
+export PATH="$HOME/projects/dotfiles/agents/shims:$PATH"
