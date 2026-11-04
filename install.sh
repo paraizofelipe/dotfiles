@@ -25,7 +25,7 @@ ln -sf $PWD/git/.gitignore $HOME/.gitignore
 # libnotify-bin (notify-send) + libglib2.0-bin (gdbus): alertas e botão de trocar conta
 sudo apt-get update
 sudo apt-get install -y python3 pipx alacritty picom xdg-utils libnotify-bin libglib2.0-bin \
-  libxcb-cursor0 libxkbcommon-x11-0 libegl1 libfontconfig1 libdbus-1-3 curl xz-utils fontconfig
+  libxcb-cursor0 libxkbcommon-x11-0 libegl1 libfontconfig1 libdbus-1-3 curl xz-utils fontconfig fonts-hack-ttf
 command -v uv >/dev/null || pipx install uv
 export PATH="$HOME/.local/bin:$PATH"
 # Hack Nerd Font >= 3.5: traz os logos do Claude/OpenAI (U+EC82/U+EC81) usados na barra
