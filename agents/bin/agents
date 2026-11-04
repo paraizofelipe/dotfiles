@@ -28,6 +28,9 @@ from agents_usage import accounts, alerts, common, update, view  # noqa: E402
 PRIVATE_BROWSER = os.path.join(AGENTS_DIR, "bin", "agents-private-browser")
 TERMINAL = os.environ.get("AGENTS_TERMINAL", "alacritty")
 ROBOT = "\uf544"  # Font Awesome 5 Solid, já carregada no polybar
+# Logos da Nerd Font >= 3.5 (codicons), desenhados com a font-5 do polybar (%{T6})
+PROVIDER_GLYPHS = {"claude": "\uec82", "codex": "\uec81"}
+GLYPH_FONT = 6
 
 
 def cmd_bar():
@@ -35,8 +38,13 @@ def cmd_bar():
     model = view.build(usage, accounts.load_registry())
     worst = model["worst"]
     color = view.COLORS["none"] if model["outdated"] else worst["color"]
-    label = f" {worst['percent']:.0f}%" if worst["severity"] in ("medium", "high") else ""
-    print(f"%{{F{color}}}{ROBOT}{label}%{{F-}}")
+    icon, label = ROBOT, ""
+    if worst["severity"] in ("medium", "high"):
+        # Com alerta, o logo diz de qual provider é o percentual.
+        glyph = PROVIDER_GLYPHS.get(worst["provider"])
+        icon = f"%{{T{GLYPH_FONT}}}{glyph}%{{T-}}" if glyph else ROBOT
+        label = f" {worst['percent']:.0f}%"
+    print(f"%{{F{color}}}{icon}{label}%{{F-}}")
     return 0
 
 

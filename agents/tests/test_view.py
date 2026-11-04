@@ -106,8 +106,13 @@ class TestWorst(unittest.TestCase):
         worst = view.worst(records, registry())
         self.assertEqual((worst["percent"], worst["severity"]), (92, "high"))
 
+    def test_should_name_provider_of_worst_limit_for_bar_glyph(self):
+        records = [rec("claude", "main", 92), rec("codex", "main", 30)]
+        self.assertEqual(view.worst(records, registry())["provider"], "claude")
+
     def test_should_be_neutral_without_limits(self):
-        self.assertEqual(view.worst([], registry())["severity"], "none")
+        worst = view.worst([], registry())
+        self.assertEqual((worst["severity"], worst["provider"]), ("none", None))
 
 
 if __name__ == "__main__":

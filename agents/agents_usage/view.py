@@ -126,7 +126,7 @@ def ticker(token_stats, records):
 
 def worst(records, registry):
     """Pior meter entre as contas ativas: alimenta a cor do ícone da barra."""
-    best = {"percent": None, "severity": "none", "color": COLORS["none"]}
+    best = {"percent": None, "severity": "none", "color": COLORS["none"], "provider": None}
     for r in records:
         if r["provider"] in accounts.MULTI_ACCOUNT_PROVIDERS:
             if r["account"] != registry[r["provider"]].get("active", "main"):
@@ -135,7 +135,8 @@ def worst(records, registry):
             sev = common.severity(lim)
             if (SEVERITY_ORDER.index(sev) > SEVERITY_ORDER.index(best["severity"])
                     or (sev == best["severity"] and lim["percent"] > (best["percent"] or -1))):
-                best = {"percent": lim["percent"], "severity": sev, "color": COLORS[sev]}
+                best = {"percent": lim["percent"], "severity": sev, "color": COLORS[sev],
+                        "provider": r["provider"]}
     return best
 
 

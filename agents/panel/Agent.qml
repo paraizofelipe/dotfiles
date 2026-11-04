@@ -5,7 +5,7 @@ import QtQuick.Layouts
 // Seção de um provider: contas com medidores (ou saldo), Use/Autoswitch e "+".
 ColumnLayout {
     id: section
-    property var provider: ({ name: "", accounts: [] })
+    property var provider: ({ id: "", name: "", accounts: [] })
     property int selectedKey: 0
     property bool last: false
     property bool adding: false
@@ -17,6 +17,14 @@ ColumnLayout {
         Layout.topMargin: 12
         Layout.leftMargin: 14
         Layout.rightMargin: 10
+        spacing: 7
+        // Logo do provider (icons/<id>.svg, ver icons/README.md)
+        Image {
+            source: section.provider.id ? Qt.resolvedUrl("icons/" + section.provider.id + ".svg") : ""
+            sourceSize { width: 14; height: 14 }
+            Layout.preferredWidth: 14
+            Layout.preferredHeight: 14
+        }
         Text {
             text: section.provider.name.toUpperCase()
             color: theme.accent
