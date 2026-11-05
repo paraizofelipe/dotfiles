@@ -20,7 +20,7 @@ git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 ln -sf $PWD/git/.gitconfig $HOME/.gitconfig
 ln -sf $PWD/git/.gitignore $HOME/.gitignore
 
-# Painel de agentes (uso de Claude/Codex/OpenRouter no polybar)
+# Painel de agentes (ai-usage: uso de Claude/Codex/OpenRouter no polybar)
 # libxcb-cursor0/libxkbcommon-x11-0/libegl1: exigidas pelo plugin xcb do Qt 6 (PySide6)
 # libnotify-bin (notify-send) + libglib2.0-bin (gdbus): alertas e botão de trocar conta
 sudo apt-get update
@@ -41,18 +41,7 @@ if ! fc-list ":family=Hack Nerd Font:charset=ec82" | grep -q .; then
 fi
 # Sem pacote apt equivalente (o fonts-font-awesome do 22.04 é a 4.7): só avisa.
 fc-list | grep -q "Font Awesome 5 Free" || echo "AVISO: instale a Font Awesome 5 Free (ícone da barra) em ~/.local/share/fonts"
-mkdir -p "$HOME/.local/bin" "$HOME/.config/systemd/user"
-ln -sf "$PWD/agents/bin/agents" "$HOME/.local/bin/agents"
-ln -sf "$PWD/agents/bin/agents-panel" "$HOME/.local/bin/agents-panel"
-ln -sf "$PWD/agents/systemd/agents-usage.service" "$HOME/.config/systemd/user/agents-usage.service"
-ln -sf "$PWD/agents/systemd/agents-usage.timer" "$HOME/.config/systemd/user/agents-usage.timer"
-if command -v uv >/dev/null; then
-  # Mesmo caminho que o bin/agents-panel procura
-  AGENTS_VENV="${XDG_DATA_HOME:-$HOME/.local/share}/agents/venv"
-  [ -x "$AGENTS_VENV/bin/python" ] || uv venv --quiet --python 3.13 "$AGENTS_VENV"
-  uv pip install --quiet --python "$AGENTS_VENV/bin/python" PySide6-Essentials==6.12.0
-else
-  echo "uv não encontrado: instale-o e rode de novo para criar o venv do painel de agentes"
-fi
-systemctl --user daemon-reload
-systemctl --user enable --now agents-usage.timer
+# O app fica em repo próprio; o install.sh dele cuida do uv tool, dos shims e do timer.
+AI_USAGE_DIR="$HOME/projects/ai-usage"
+[ -d "$AI_USAGE_DIR" ] || git clone https://github.com/paraizofelipe/ai-usage "$AI_USAGE_DIR"
+"$AI_USAGE_DIR/install.sh"
