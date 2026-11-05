@@ -29,3 +29,6 @@ exec_always --no-startup-id fix_xcursor
 
 # Volume icon
 exec --no-startup-id volumeicon
+
+# Notification daemon (oasis): session env first, then the unit
+exec --no-startup-id sh -c 'dbus-update-activation-environment --systemd DISPLAY XAUTHORITY DBUS_SESSION_BUS_ADDRESS && systemctl --user start oasis-notify.service'
