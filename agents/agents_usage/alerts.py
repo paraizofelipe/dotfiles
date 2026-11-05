@@ -23,13 +23,17 @@ NORMAL_INTERVAL = 15 * 60
 ACTION_TIMEOUT = 10 * 60  # quanto tempo a notificação com ação fica escutando o clique
 
 
-def peak(record):
-    """Maior percentual entre os limites da conta, ou None sem dados utilizáveis."""
+def peak(record, now=None):
+    """Maior percentual entre os limites da conta, ou None sem dados utilizáveis.
+    Janelas que já resetaram não contam: com dado stale o percentual é do ciclo anterior."""
+    now = time.time() if now is None else now
     if not record or not record.get("limits"):
         return None
     if record.get("status") != common.OK and not record.get("stale"):
         return None
-    return max(lim["percent"] for lim in record["limits"])
+    live = [lim["percent"] for lim in record["limits"]
+            if not lim.get("resets_at") or lim["resets_at"] > now]
+    return max(live) if live else None
 
 
 def frees_at(record, threshold):
@@ -57,12 +61,13 @@ def decide(records, registry, now=None):
         threshold = entry.get("threshold", accounts.DEFAULT_THRESHOLD)
         mine = [r for r in records if r["provider"] == provider]
         active = next((r for r in mine if r["account"] == entry.get("active", "main")), None)
-        active_peak = peak(active)
+        active_peak = peak(active, now)
         if active is None or active_peak is None or active_peak < threshold:
             continue
         name = active["provider_name"]
         window_key = frees_at(active, threshold)
-        others = [(peak(r), r) for r in mine if r is not active]
+        # Só troca para conta com leitura atual: offline/erro podem estar sem login ou esgotadas.
+        others = [(peak(r, now), r) for r in mine if r is not active and r.get("status") == common.OK]
         free = sorted(((p, r) for p, r in others if p is not None and p < threshold),
                       key=lambda pr: pr[0])
         if free:
@@ -78,7 +83,7 @@ def decide(records, registry, now=None):
                             "title": title, "body": body,
                             "key": f"{provider}:{active['account']}:{kind}:{window_key}"})
             continue
-        candidates = [(frees_at(r, threshold), r) for r in mine if peak(r) is not None]
+        candidates = [(frees_at(r, threshold), r) for r in mine if peak(r, now) is not None]
         candidates = [(t, r) for t, r in candidates if t]
         first = min(candidates, key=lambda tr: tr[0]) if candidates else None
         body = (f"{first[1]['label']} libera primeiro, às {_clock(first[0])}." if first and len(mine) > 1
@@ -89,13 +94,13 @@ def decide(records, registry, now=None):
     return actions
 
 
-def needs_fast_poll(records, registry):
+def needs_fast_poll(records, registry, now=None):
     for provider in accounts.MULTI_ACCOUNT_PROVIDERS:
         entry = registry[provider]
         threshold = entry.get("threshold", accounts.DEFAULT_THRESHOLD)
         for r in records:
             if r["provider"] == provider and r["account"] == entry.get("active", "main"):
-                p = peak(r)
+                p = peak(r, now)
                 if p is not None and p >= threshold - NEAR_MARGIN:
                     return True
     return False
@@ -107,11 +112,12 @@ def next_interval(records, registry):
 
 # ------------------------------------------------------------------ efeitos
 def notify(title, body, urgency="normal"):
+    """True se a notificação foi entregue ao servidor de notificações."""
     try:
-        subprocess.run(["notify-send", "-a", "Agents", "-u", urgency, title, body],
-                       check=False, timeout=5)
+        return subprocess.run(["notify-send", "-a", "Agents", "-u", urgency, title, body],
+                              check=False, timeout=5).returncode == 0
     except (OSError, subprocess.TimeoutExpired):
-        pass
+        return False
 
 
 def spawn_action_notification(action, agents_bin):
@@ -124,8 +130,16 @@ def spawn_action_notification(action, agents_bin):
         start_new_session=True)
 
 
+def still_active(provider, account_id, mode=None, data_dir=None):
+    """Relê o registro: o usuário pode ter trocado conta/modo durante a coleta."""
+    entry = accounts.load_registry(accounts.registry_file(data_dir))[provider]
+    return entry.get("active", "main") == account_id and (mode is None or entry.get("mode") == mode)
+
+
 def apply(actions, agents_bin, alerts_file=None, data_dir=None, notifier=notify, spawner=None):
-    """Executa as ações ainda não alertadas nesta janela. Retorna as executadas."""
+    """Executa as ações ainda não alertadas nesta janela. Retorna as executadas.
+    Só marca como enviada a ação que de fato chegou ao usuário; o resto é
+    recalculado na próxima coleta."""
     alerts_file = alerts_file or ALERTS_FILE
     spawner = spawner or spawn_action_notification
     sent = common.read_json(alerts_file, {}) or {}
@@ -135,12 +149,14 @@ def apply(actions, agents_bin, alerts_file=None, data_dir=None, notifier=notify,
         if action["key"] in sent:
             continue
         if action["kind"] == "switch":
+            if not still_active(action["provider"], action["from"], "auto", data_dir):
+                continue
             accounts.use_account(action["provider"], action["to"], data_dir=data_dir)
-            notifier(action["title"], action["body"])
+            notifier(action["title"], action["body"])  # a troca já valeu, mesmo sem o aviso
         elif action["kind"] == "suggest":
             spawner(action, agents_bin)
-        else:
-            notifier(action["title"], action["body"], "critical")
+        elif not notifier(action["title"], action["body"], "critical"):
+            continue
         sent[action["key"]] = time.time()
         done.append(action)
     # Esquece alertas que não se aplicam mais, para dispararem de novo na próxima vez.

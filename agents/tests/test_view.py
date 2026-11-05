@@ -79,6 +79,18 @@ class TestBuild(unittest.TestCase):
         self.assertEqual(acc["balance"], {"text": "US$ 25,00 de US$ 100,00", "fraction": 0.25})
         self.assertEqual((acc["plan"], acc["key"]), ("", 0))
 
+    def test_should_show_empty_balance_bar_when_prepaid_total_is_zero(self):
+        usage = {"accounts": [rec("openrouter", "main", limits=[],
+                                  balance={"remaining": 0, "total": 0.0, "currency": "USD"})]}
+        acc = view.build(usage, registry(), NOW)["providers"][2]["accounts"][0]
+        self.assertEqual(acc["balance"]["fraction"], 0.0)
+
+    def test_should_show_full_bar_when_balance_total_is_unknown(self):
+        usage = {"accounts": [rec("openrouter", "main", limits=[],
+                                  balance={"remaining": 12.5, "total": None, "currency": "USD"})]}
+        acc = view.build(usage, registry(), NOW)["providers"][2]["accounts"][0]
+        self.assertEqual(acc["balance"]["fraction"], 1.0)
+
     def test_should_flag_outdated_usage_file(self):
         self.assertTrue(view.build({"updated_at": NOW - 31 * 60}, registry(), NOW)["outdated"])
         self.assertTrue(view.build({}, registry(), NOW)["outdated"])
@@ -109,6 +121,11 @@ class TestWorst(unittest.TestCase):
     def test_should_name_provider_of_worst_limit_for_bar_glyph(self):
         records = [rec("claude", "main", 92), rec("codex", "main", 30)]
         self.assertEqual(view.worst(records, registry())["provider"], "claude")
+
+    def test_should_ignore_stale_records_whose_pace_is_no_longer_measured(self):
+        records = [rec("claude", "main", 10), rec("codex", "main", 92, stale=True)]
+        worst = view.worst(records, registry(), NOW)
+        self.assertEqual((worst["percent"], worst["provider"]), (10, "claude"))
 
     def test_should_be_neutral_without_limits(self):
         worst = view.worst([], registry())

@@ -53,6 +53,17 @@ class TestClaudeParsing(unittest.TestCase):
                  claude_line("m2", NOW, kind="user"), ""]
         self.assertEqual(tokens.parse_claude_lines(lines), [])
 
+    def test_should_skip_valid_json_lines_with_unexpected_shapes_and_keep_the_rest(self):
+        bad = [
+            json.dumps({"type": "assistant", "timestamp": iso(NOW), "message": "texto", "usage": 1}),
+            json.dumps({"type": "assistant", "timestamp": iso(NOW),
+                        "message": {"id": "x", "model": "m", "usage": ["assistant", "usage"]}}),
+            json.dumps({"type": "assistant", "timestamp": iso(NOW),
+                        "message": {"id": "y", "model": "m", "usage": {"input_tokens": "n/a"}}}),
+        ]
+        parsed = tokens.parse_claude_lines(bad + [claude_line("ok", NOW)])
+        self.assertEqual([e[0] for e in parsed], ["ok"])
+
 
 class TestCodexParsing(unittest.TestCase):
     def test_should_attribute_model_and_split_cached_input(self):
@@ -62,6 +73,12 @@ class TestCodexParsing(unittest.TestCase):
 
     def test_should_ignore_repeated_events_with_same_cumulative_total(self):
         lines = [codex_token_line(NOW, 10, 0, 5, 15), codex_token_line(NOW + 1, 10, 0, 5, 15)]
+        self.assertEqual(len(tokens.parse_codex_lines(lines, "f")), 1)
+
+    def test_should_skip_malformed_codex_events_without_losing_later_ones(self):
+        bad = json.dumps({"type": "event_msg", "timestamp": iso(NOW),
+                          "payload": {"type": "token_count", "info": {"last_token_usage": "x"}}})
+        lines = [codex_context_line("gpt-5"), bad, codex_token_line(NOW, 100, 40, 10, 150)]
         self.assertEqual(len(tokens.parse_codex_lines(lines, "f")), 1)
 
     def test_should_skip_events_without_last_usage(self):
@@ -188,6 +205,20 @@ class TestUpdate(unittest.TestCase):
         codex = next(r for r in data["accounts"] if r["provider"] == "codex")
         self.assertEqual(data["accounts"][0]["status"], common.ERROR)
         self.assertEqual(codex["status"], common.OK)
+
+    def test_should_store_token_stats_from_real_transcripts(self):
+        home = os.path.join(self.tmp.name, "claude-home")
+        os.makedirs(os.path.join(home, "projects", "p"))
+        with open(os.path.join(home, "projects", "p", "s.jsonl"), "w") as f:
+            f.write(claude_line("m1", NOW - 60, inp=7) + "\n")
+        os.utime(os.path.join(home, "projects", "p", "s.jsonl"), (NOW, NOW))
+        self.registry["claude"]["accounts"] = [{"id": "main", "label": "Main", "home": home}]
+        self.registry["claude"]["active"] = "main"
+        self.addCleanup(setattr, common, "TOKENS_CACHE_FILE", common.TOKENS_CACHE_FILE)
+        common.TOKENS_CACHE_FILE = os.path.join(self.tmp.name, "tokens-cache.json")
+        data = update.run(now=NOW, registry=self.registry, usage_file=self.usage_file,
+                          collectors={"claude": self.ok(1), "codex": self.ok(1), "openrouter": self.ok(0)})
+        self.assertEqual(data["tokens"]["claude"]["week"]["input"], 7)
 
     def test_should_survive_corrupt_previous_usage_file(self):
         os.makedirs(os.path.dirname(self.usage_file))

@@ -31,25 +31,26 @@ export PATH="$HOME/.local/bin:$PATH"
 # Hack Nerd Font >= 3.5: traz os logos do Claude/OpenAI (U+EC82/U+EC81) usados na barra
 if ! fc-list ":family=Hack Nerd Font:charset=ec82" | grep -q .; then
   NF_TMP=$(mktemp -d)
-  curl -fsSL -o $NF_TMP/Hack.tar.xz https://github.com/ryanoasis/nerd-fonts/releases/download/v3.5.1/Hack.tar.xz &&
+  curl -fsSL -o "$NF_TMP/Hack.tar.xz" https://github.com/ryanoasis/nerd-fonts/releases/download/v3.5.1/Hack.tar.xz &&
     echo "cdd389472e10e2261520140ff1b382b4f8a226af5fd0b2735b975d31151d9c3c  $NF_TMP/Hack.tar.xz" | sha256sum -c --quiet - &&
-    mkdir -p $HOME/.local/share/fonts/Hack &&
-    tar -xJf $NF_TMP/Hack.tar.xz -C $HOME/.local/share/fonts/Hack &&
-    fc-cache -f $HOME/.local/share/fonts ||
+    mkdir -p "$HOME/.local/share/fonts/Hack" &&
+    tar -xJf "$NF_TMP/Hack.tar.xz" -C "$HOME/.local/share/fonts/Hack" &&
+    fc-cache -f "$HOME/.local/share/fonts" ||
     echo "AVISO: falha ao instalar a Hack Nerd Font v3.5.1"
   rm -rf "$NF_TMP"
 fi
 # Sem pacote apt equivalente (o fonts-font-awesome do 22.04 é a 4.7): só avisa.
 fc-list | grep -q "Font Awesome 5 Free" || echo "AVISO: instale a Font Awesome 5 Free (ícone da barra) em ~/.local/share/fonts"
-mkdir -p $HOME/.local/bin $HOME/.config/systemd/user
-ln -sf $PWD/agents/bin/agents $HOME/.local/bin/agents
-ln -sf $PWD/agents/bin/agents-panel $HOME/.local/bin/agents-panel
-ln -sf $PWD/agents/systemd/agents-usage.service $HOME/.config/systemd/user/agents-usage.service
-ln -sf $PWD/agents/systemd/agents-usage.timer $HOME/.config/systemd/user/agents-usage.timer
+mkdir -p "$HOME/.local/bin" "$HOME/.config/systemd/user"
+ln -sf "$PWD/agents/bin/agents" "$HOME/.local/bin/agents"
+ln -sf "$PWD/agents/bin/agents-panel" "$HOME/.local/bin/agents-panel"
+ln -sf "$PWD/agents/systemd/agents-usage.service" "$HOME/.config/systemd/user/agents-usage.service"
+ln -sf "$PWD/agents/systemd/agents-usage.timer" "$HOME/.config/systemd/user/agents-usage.timer"
 if command -v uv >/dev/null; then
-  AGENTS_VENV=$HOME/.local/share/agents/venv
-  [ -x $AGENTS_VENV/bin/python ] || uv venv --quiet --python 3.13 $AGENTS_VENV
-  uv pip install --quiet --python $AGENTS_VENV/bin/python PySide6-Essentials==6.12.0
+  # Mesmo caminho que o bin/agents-panel procura
+  AGENTS_VENV="${XDG_DATA_HOME:-$HOME/.local/share}/agents/venv"
+  [ -x "$AGENTS_VENV/bin/python" ] || uv venv --quiet --python 3.13 "$AGENTS_VENV"
+  uv pip install --quiet --python "$AGENTS_VENV/bin/python" PySide6-Essentials==6.12.0
 else
   echo "uv não encontrado: instale-o e rode de novo para criar o venv do painel de agentes"
 fi

@@ -94,6 +94,10 @@ class TestEnv(unittest.TestCase):
         self.addCleanup(os.unlink, f.name)
         self.assertEqual(common.env_var("OPENROUTER_TEST_KEY", [f.name]), "sk-abc")
 
+    def test_should_use_last_assignment_like_sourcing_the_file(self):
+        text = 'export OPENROUTER_TEST_KEY="sk-old"\nOPENROUTER_TEST_KEY=sk-new\n'
+        self.assertEqual(common.extract_env_value(text, "OPENROUTER_TEST_KEY"), "sk-new")
+
     def test_should_return_none_when_missing_everywhere(self):
         self.assertIsNone(common.env_var("DEFINITELY_NOT_SET_VAR", ["/nonexistent"]))
 
@@ -220,6 +224,13 @@ class TestOpenRouter(unittest.TestCase):
         res = openrouter.collect({}, key="k", fetch=returning(
             {"data": {"total_credits": 20, "total_usage": 7.25}}))
         self.assertEqual(res["balance"], {"remaining": 12.75, "total": 20.0, "currency": "USD"})
+
+    def test_should_report_error_instead_of_zero_balance_when_fields_are_missing(self):
+        for payload in ({"data": {"total_credits": 20}}, {"data": None}, {"data": {"total_usage": "x",
+                                                                                  "total_credits": 1}}):
+            res = openrouter.collect({}, key="k", fetch=returning(payload))
+            self.assertEqual(res["status"], common.ERROR, payload)
+            self.assertNotIn("balance", res)
 
     def test_should_be_not_configured_without_key(self):
         os.environ.pop("OPENROUTER_API_KEY", None)

@@ -13,7 +13,8 @@ fail() {
 }
 
 # directory = "..." da seção [worktrees] (padrão do herdr: ~/.herdr/worktrees)
-root="$(sed -n '/^\[worktrees\]/,/^\[/{s/^directory *= *"\(.*\)"/\1/p}' "$config" 2>/dev/null | head -n 1)"
+# || true: sem config, o pipefail + set -e encerrariam o script antes do padrão abaixo
+root="$(sed -n '/^\[worktrees\]/,/^\[/{s/^directory *= *"\(.*\)"/\1/p}' "$config" 2>/dev/null | head -n 1 || true)"
 root="${root:-~/.herdr/worktrees}"
 root="${root/#\~/$HOME}"
 

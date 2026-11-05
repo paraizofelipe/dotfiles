@@ -79,7 +79,9 @@ def account_view(index, acc, record, now):
         balance_view = {
             "text": (f"{money(remaining, balance.get('currency'))} de {money(total)}" if total
                      else money(remaining, balance.get("currency"))),
-            "fraction": min(1.0, max(0.0, remaining / total)) if total else 1.0,
+            # total desconhecido (créditos avulsos): barra cheia; total zero: barra vazia
+            "fraction": (1.0 if total is None else
+                         min(1.0, max(0.0, remaining / total)) if total else 0.0),
         }
     status_text = STATUS_TEXT.get(status, "Aguardando atualização") if status else "Aguardando atualização"
     if record.get("stale"):
@@ -98,7 +100,7 @@ def account_view(index, acc, record, now):
     }
 
 
-def ticker(token_stats, records):
+def ticker(token_stats, records, now=None):
     lines = []
     total = sum((s.get("week") or {}).get("total", 0) for s in token_stats.values() if isinstance(s, dict))
     if total:
@@ -111,7 +113,7 @@ def ticker(token_stats, records):
     if merged:
         model = max(merged, key=merged.__getitem__)
         lines.append(f"Modelo mais usado: {model} ({human_tokens(merged[model])})")
-    today = time.strftime("%Y-%m-%d")
+    today = time.strftime("%Y-%m-%d", time.localtime(now))
     today_total = sum((s.get("by_day") or {}).get(today, 0) for s in token_stats.values() if isinstance(s, dict))
     if today_total:
         lines.append(f"Hoje: {human_tokens(today_total)} tokens")
@@ -124,15 +126,19 @@ def ticker(token_stats, records):
     return lines or ["Sem uso registrado nos últimos 7 dias"]
 
 
-def worst(records, registry):
-    """Pior meter entre as contas ativas: alimenta a cor do ícone da barra."""
+def worst(records, registry, now=None):
+    """Pior meter entre as contas ativas: alimenta a cor do ícone da barra.
+    Registros stale ficam de fora: o ritmo de um percentual congelado cai com o
+    tempo e pintaria a barra com uma severidade que ninguém mediu."""
     best = {"percent": None, "severity": "none", "color": COLORS["none"], "provider": None}
     for r in records:
         if r["provider"] in accounts.MULTI_ACCOUNT_PROVIDERS:
             if r["account"] != registry[r["provider"]].get("active", "main"):
                 continue
+        if r.get("stale"):
+            continue
         for lim in r.get("limits") or []:
-            sev = common.severity(lim)
+            sev = common.severity(lim, now)
             if (SEVERITY_ORDER.index(sev) > SEVERITY_ORDER.index(best["severity"])
                     or (sev == best["severity"] and lim["percent"] > (best["percent"] or -1))):
                 best = {"percent": lim["percent"], "severity": sev, "color": COLORS[sev],
@@ -175,7 +181,7 @@ def build(usage, registry, now=None):
     return {
         "updated_text": f"Atualizado {ago(updated, now)}" if updated else "Nunca atualizado",
         "outdated": bool(updated is None or now - updated > STALE_AFTER),
-        "ticker": ticker(usage.get("tokens") or {}, records),
+        "ticker": ticker(usage.get("tokens") or {}, records, now),
         "providers": providers,
-        "worst": worst(records, registry),
+        "worst": worst(records, registry, now),
     }

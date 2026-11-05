@@ -79,14 +79,15 @@ def accounts_for(provider, registry=None):
 
 
 def find_account(registry, provider, ref):
-    """Por id, label (case-insensitive) ou posição 1-based."""
+    """Por id, label (case-insensitive) ou posição 1-based, nessa ordem: uma
+    conta chamada "2" vence a posição 2."""
     accs = registry[provider]["accounts"]
     ref = str(ref).strip()
-    if ref.isdigit() and 1 <= int(ref) <= len(accs):
-        return accs[int(ref) - 1]
     for acc in accs:
         if ref.lower() in (acc["id"], acc.get("label", "").lower()):
             return acc
+    if ref.isdigit() and 1 <= int(ref) <= len(accs):
+        return accs[int(ref) - 1]
     raise AccountError(f"conta '{ref}' não encontrada em {provider}")
 
 
@@ -95,6 +96,14 @@ def slugify(label):
     if not slug:
         raise AccountError("nome de conta inválido")
     return slug
+
+
+def _check_label_free(registry, provider, label, ignore=None):
+    """Nomes ambíguos fariam find_account achar a conta errada (até no remove)."""
+    wanted = label.strip().lower()
+    for acc in registry[provider]["accounts"]:
+        if acc is not ignore and wanted in (acc["id"], acc.get("label", "").lower()):
+            raise AccountError(f"já existe a conta '{acc['label']}' em {provider}")
 
 
 def _link_shared(provider, home):
@@ -117,14 +126,19 @@ def add_account(provider, label, data_dir=None, main_state=None):
     account_id = slugify(label)
     if any(a["id"] == account_id for a in registry[provider]["accounts"]):
         raise AccountError(f"já existe a conta '{account_id}' em {provider}")
+    _check_label_free(registry, provider, label)
     home = os.path.join(accounts_root(provider, data_dir), account_id)
     os.makedirs(home, mode=0o700)
-    _link_shared(provider, home)
-    if provider == "claude":
-        _copy_claude_mcp(home, main_state)
     account = {"id": account_id, "label": label.strip(), "home": home}
-    registry[provider]["accounts"].append(account)
-    save_registry(registry, data_dir)
+    try:
+        _link_shared(provider, home)
+        if provider == "claude":
+            _copy_claude_mcp(home, main_state)
+        registry[provider]["accounts"].append(account)
+        save_registry(registry, data_dir)
+    except BaseException:
+        shutil.rmtree(home, ignore_errors=True)
+        raise
     return account
 
 
@@ -144,9 +158,12 @@ def _write_pointer(provider, account, data_dir=None):
 def use_account(provider, ref, data_dir=None):
     registry = load_registry(registry_file(data_dir))
     account = find_account(registry, provider, ref)
+    if account["id"] != "main" and os.path.isdir(account["home"]):
+        _link_shared(provider, account["home"])  # itens criados na main depois do add
+    # Ponteiro primeiro: se falhar, o registro continua coerente com o que os shims usam.
+    _write_pointer(provider, account, data_dir)
     registry[provider]["active"] = account["id"]
     save_registry(registry, data_dir)
-    _write_pointer(provider, account, data_dir)
     return account
 
 
@@ -155,12 +172,23 @@ def rename_account(provider, ref, label, data_dir=None):
     account = find_account(registry, provider, ref)
     if not label.strip():
         raise AccountError("nome de conta inválido")
+    _check_label_free(registry, provider, label, ignore=account)
     account["label"] = label.strip()  # o id fica estável: é o que os comandos usam
     save_registry(registry, data_dir)
     return account
 
 
-def remove_account(provider, ref, data_dir=None):
+def _forget_usage(provider, account_id, usage_file=None):
+    usage_file = usage_file or common.USAGE_FILE
+    usage = common.read_json(usage_file)
+    if not isinstance(usage, dict) or not usage.get("accounts"):
+        return
+    usage["accounts"] = [r for r in usage["accounts"]
+                         if (r.get("provider"), r.get("account")) != (provider, account_id)]
+    common.write_json_atomic(usage_file, usage)
+
+
+def remove_account(provider, ref, data_dir=None, usage_file=None):
     registry = load_registry(registry_file(data_dir))
     account = find_account(registry, provider, ref)
     if account["id"] == "main":
@@ -175,6 +203,7 @@ def remove_account(provider, ref, data_dir=None):
         registry[provider]["active"] = "main"
         _write_pointer(provider, _main_account(provider), data_dir)
     save_registry(registry, data_dir)
+    _forget_usage(provider, account["id"], usage_file)
     if os.path.isdir(home):
         shutil.rmtree(home)
     return account
@@ -203,5 +232,6 @@ def login_command(provider, account, browser=None):
             env["BROWSER"] = browser
     else:
         env.pop(HOME_ENV[provider], None)
+        env["AGENTS_SKIP_ACTIVE"] = "1"  # sem isto o shim aplicaria a conta extra ativa
     argv = ["claude", "auth", "login"] if provider == "claude" else ["codex", "login"]
     return argv, env

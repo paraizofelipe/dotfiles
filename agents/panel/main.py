@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Painel de agentes (PySide6 + QML). Rodar de novo com o painel aberto fecha
 o painel (toggle do clique no polybar)."""
+import fcntl
 import os
 import shlex
 import signal
@@ -12,6 +13,7 @@ sys.path.insert(0, AGENTS_DIR)
 from agents_usage import accounts, common, view  # noqa: E402
 
 PIDFILE = os.path.join(common.STATE_DIR, "panel.pid")
+LOCKFILE = os.path.join(common.STATE_DIR, "panel.lock")
 AGENTS_BIN = os.path.join(AGENTS_DIR, "bin", "agents")
 TERMINAL = os.environ.get("AGENTS_TERMINAL", "alacritty")
 MONITOR = os.environ.get("AGENTS_PANEL_MONITOR", "DP-1")
@@ -49,7 +51,14 @@ def toggle_off_if_open():
 
 
 def main():
-    if toggle_off_if_open():
+    # Lock atômico: dois cliques rápidos não abrem dois painéis. Quem não pega o
+    # lock é o clique de fechar (toggle).
+    os.makedirs(common.STATE_DIR, mode=0o700, exist_ok=True)
+    lock = open(LOCKFILE, "w")
+    try:
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        toggle_off_if_open()
         return 0
 
     from PySide6.QtCore import (QFileSystemWatcher, QObject, QProcess, Property, QTimer, QUrl,
@@ -65,7 +74,9 @@ def main():
             super().__init__()
             self._model = {}
             self._busy = False
-            self._proc = None
+            self._update_pid = None
+            self._poll = QTimer(self)
+            self._poll.timeout.connect(self._check_update)
             os.makedirs(common.STATE_DIR, mode=0o700, exist_ok=True)
             # O usage.json é trocado via rename atômico: observar o diretório.
             self._watcher = QFileSystemWatcher([common.STATE_DIR])
@@ -97,10 +108,26 @@ def main():
         def refresh(self):
             if self._busy:
                 return
+            # Destacado: fechar o painel no meio da coleta não pode matar o update.
+            ok, pid = QProcess.startDetached(AGENTS_BIN, ["usage-update"], AGENTS_DIR)
+            if not ok:
+                print("agents-panel: não foi possível iniciar o usage-update", file=sys.stderr)
+                return
+            self._update_pid = pid
             self._set_busy(True)
-            self._proc = QProcess(self)
-            self._proc.finished.connect(lambda *_: (self._set_busy(False), self.reload()))
-            self._proc.start(AGENTS_BIN, ["usage-update"])
+            self._poll.start(500)
+
+        def _check_update(self):
+            try:
+                os.kill(self._update_pid, 0)  # destacado: o init recolhe, não vira zumbi nosso
+                return
+            except ProcessLookupError:
+                pass
+            except PermissionError:
+                return
+            self._poll.stop()
+            self._set_busy(False)
+            self.reload()
 
         def _guard(self, fn, *args):
             try:
@@ -147,15 +174,15 @@ def main():
             return {"right": g.x() + g.width() - MARGIN, "top": g.y() + BAR_HEIGHT + 4,
                     "maxHeight": g.height() - BAR_HEIGHT - 2 * MARGIN}
 
-    os.makedirs(common.STATE_DIR, mode=0o700, exist_ok=True)
     with open(PIDFILE, "w", encoding="utf-8") as f:
         f.write(str(os.getpid()))
 
     QGuiApplication.setApplicationName("agents-panel")
     QGuiApplication.setDesktopFileName("agents-panel")
     app = QGuiApplication(sys.argv)
-    signal.signal(signal.SIGTERM, lambda *_: app.quit())
-    signal.signal(signal.SIGINT, lambda *_: app.quit())
+    # singleShot: um quit() antes do app.exec() seria ignorado (toggle logo após abrir)
+    signal.signal(signal.SIGTERM, lambda *_: QTimer.singleShot(0, app.quit))
+    signal.signal(signal.SIGINT, lambda *_: QTimer.singleShot(0, app.quit))
     # Sem isto o Python não roda os handlers de sinal enquanto o loop do Qt está ocioso.
     tick = QTimer()
     tick.timeout.connect(lambda: None)
@@ -176,11 +203,11 @@ def main():
     try:
         return app.exec()
     finally:
-        if running_panel_pid() is None:
-            try:
-                os.remove(PIDFILE)
-            except OSError:
-                pass
+        try:
+            os.remove(PIDFILE)  # só o dono do lock chega aqui
+        except OSError:
+            pass
+        lock.close()
 
 
 if __name__ == "__main__":

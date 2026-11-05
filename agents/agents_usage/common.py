@@ -55,11 +55,12 @@ def write_json_atomic(path, data, mode=0o600):
 
 
 def extract_env_value(text, name):
-    """Valor de `NAME=valor` (ou `export NAME=valor`), sem aspas externas."""
-    match = re.search(rf"^\s*(?:export\s+)?{re.escape(name)}=(.*)$", text, re.M)
-    if not match:
+    """Valor de `NAME=valor` (ou `export NAME=valor`), sem aspas externas.
+    A última atribuição vence, como ao fazer `source` do arquivo."""
+    matches = re.findall(rf"^\s*(?:export\s+)?{re.escape(name)}=(.*)$", text, re.M)
+    if not matches:
         return None
-    return match.group(1).strip().strip('"').strip("'")
+    return matches[-1].strip().strip('"').strip("'")
 
 
 def env_var(name, env_files=None):

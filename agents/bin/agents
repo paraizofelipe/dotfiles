@@ -14,6 +14,7 @@
 
 <conta> aceita id, nome ou posição (1, 2...). Sem provider, usa o padrão (claude).
 """
+import fcntl
 import json
 import os
 import subprocess
@@ -113,8 +114,10 @@ def cmd_account(args):
         account = accounts.rename_account(provider, rest[0], rest[1])
         print(f"Renomeada para '{account['label']}'")
         return 0
-    if sub == "mode" and rest and rest[0] in ("auto", "notify"):
-        threshold = int(rest[1]) if len(rest) > 1 and rest[1].isdigit() else None
+    if sub == "mode" and 1 <= len(rest) <= 2 and rest[0] in ("auto", "notify"):
+        if len(rest) == 2 and not rest[1].isdigit():
+            raise accounts.AccountError(f"threshold inválido: '{rest[1]}' (use 1 a 100)")
+        threshold = int(rest[1]) if len(rest) == 2 else None
         entry = accounts.set_mode(provider, rest[0], threshold)
         print(f"{provider}: modo {entry['mode']}, limite {entry['threshold']}%")
         return 0
@@ -135,6 +138,15 @@ def cmd_account(args):
 
 
 def cmd_usage_update(args):
+    # Painel e timer podem coletar juntos: sem o lock, a rodada mais lenta grava
+    # um snapshot antigo por cima do novo e os dois disparam o mesmo alerta.
+    os.makedirs(common.STATE_DIR, mode=0o700, exist_ok=True)
+    with open(os.path.join(common.STATE_DIR, "update.lock"), "w") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        return _usage_update_locked(args)
+
+
+def _usage_update_locked(args):
     registry = accounts.load_registry()
     if "--if-due" in args:
         previous = common.read_json(common.USAGE_FILE, {}) or {}
@@ -153,8 +165,22 @@ def cmd_usage_update(args):
 def cmd_notify_switch(args):
     """Interno: notificação com botão que troca a conta (disparada pelos alertas)."""
     provider, account_id, title, body = args
-    label = accounts.find_account(accounts.load_registry(), provider, account_id)["label"]
-    if alerts.wait_for_action(title, body, f"Usar {label}"):
+    registry = accounts.load_registry()
+    origin = registry[provider].get("active", "main")
+    label = accounts.find_account(registry, provider, account_id)["label"]
+    if not alerts.wait_for_action(title, body, f"Usar {label}"):
+        return 0
+    # A notificação fica clicável por até 10 min: a situação pode ter mudado.
+    usage = common.read_json(common.USAGE_FILE, {}) or {}
+    target = next((r for r in usage.get("accounts", [])
+                   if (r.get("provider"), r.get("account")) == (provider, account_id)), None)
+    threshold = registry[provider].get("threshold", accounts.DEFAULT_THRESHOLD)
+    target_peak = alerts.peak(target)
+    if not alerts.still_active(provider, origin):
+        alerts.notify(title.split(":")[0], "A conta ativa já foi trocada; nada a fazer.")
+    elif target_peak is not None and target_peak >= threshold:
+        alerts.notify(title.split(":")[0], f"{label} também passou de {threshold}%; troca cancelada.")
+    else:
         accounts.use_account(provider, account_id)
         alerts.notify(title.split(":")[0], f"Conta ativa agora é {label}.")
     return 0

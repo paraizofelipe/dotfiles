@@ -55,6 +55,17 @@ class TestDecide(unittest.TestCase):
         [action] = alerts.decide(recs, registry(), NOW)
         self.assertEqual(action["kind"], "exhausted")
 
+    def test_should_not_switch_to_offline_account_with_stale_reading(self):
+        recs = [record("main", 99), record("work", 1, status=common.OFFLINE, stale=True)]
+        [action] = alerts.decide(recs, registry(mode="auto"), NOW)
+        self.assertEqual(action["kind"], "exhausted")
+
+    def test_should_ignore_stale_window_that_already_reset(self):
+        # main offline com 99% de um ciclo de 5h que já resetou: não há o que alertar
+        recs = [record("main", 99, status=common.OFFLINE, stale=True, session_reset=NOW - 60),
+                record("work", 1)]
+        self.assertEqual(alerts.decide(recs, registry(mode="auto"), NOW), [])
+
     def test_should_report_which_account_frees_first_when_all_are_over(self):
         recs = [record("main", 99, session_reset=NOW + 4 * HOUR),
                 record("work", 98, session_reset=NOW + 1 * HOUR)]
@@ -106,11 +117,12 @@ class TestApply(unittest.TestCase):
         self.work_home = os.path.join(tmp.name, "work")
         reg = accounts.load_registry(accounts.registry_file(self.data_dir))
         reg["claude"]["accounts"].append({"id": "work", "label": "Work", "home": self.work_home})
+        reg["claude"]["mode"] = "auto"
         accounts.save_registry(reg, self.data_dir)
 
     def apply(self, actions):
         return alerts.apply(actions, "/bin/agents", alerts_file=self.alerts_file, data_dir=self.data_dir,
-                            notifier=lambda *a: self.notified.append(a),
+                            notifier=lambda *a: self.notified.append(a) or True,
                             spawner=lambda action, _bin: self.spawned.append(action))
 
     def action(self, kind, key="k1"):
@@ -134,6 +146,28 @@ class TestApply(unittest.TestCase):
         self.assertEqual(reg["claude"]["active"], "work")
         with open(accounts.pointer_file("claude", self.data_dir)) as f:
             self.assertEqual(f.read().strip(), self.work_home)
+
+    def test_should_alert_each_new_window_key_without_reset_in_between(self):
+        self.apply([self.action("suggest", "k1")])
+        self.apply([self.action("suggest", "k2")])
+        self.assertEqual([a["key"] for a in self.spawned], ["k1", "k2"])
+
+    def test_should_retry_exhausted_alert_when_notification_was_not_delivered(self):
+        failing = alerts.apply([self.action("exhausted")], "/bin/agents", alerts_file=self.alerts_file,
+                               data_dir=self.data_dir, notifier=lambda *a: False)
+        self.assertEqual(failing, [])
+        self.apply([self.action("exhausted")])
+        self.assertEqual(len(self.notified), 1)
+
+    def test_should_skip_auto_switch_when_user_changed_account_during_collection(self):
+        accounts.use_account("claude", "work", data_dir=self.data_dir)
+        self.assertEqual(self.apply([{**self.action("switch"), "to": "main", "from": "main"}]), [])
+        reg = accounts.load_registry(accounts.registry_file(self.data_dir))
+        self.assertEqual(reg["claude"]["active"], "work")
+
+    def test_should_skip_auto_switch_when_mode_went_back_to_notify(self):
+        accounts.set_mode("claude", "notify", data_dir=self.data_dir)
+        self.assertEqual(self.apply([self.action("switch")]), [])
 
     def test_should_send_exhausted_as_critical(self):
         self.apply([self.action("exhausted")])

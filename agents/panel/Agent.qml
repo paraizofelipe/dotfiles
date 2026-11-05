@@ -9,6 +9,8 @@ ColumnLayout {
     property int selectedKey: 0
     property bool last: false
     property bool adding: false
+    property int renaming: 0
+    readonly property bool editing: adding || renaming > 0
     spacing: 6
 
     // ---------------------------------------------------- título do provider
@@ -62,6 +64,8 @@ ColumnLayout {
         background: Rectangle { radius: 6; color: theme.bgSoft; border.color: theme.accent }
         onAccepted: { backend.addAccount(section.provider.id, text); section.adding = false; text = "" }
         Keys.onEscapePressed: { section.adding = false; text = "" }
+        // Enter/Esc/letras chegam ao campo, não aos Shortcut do painel (Esc fecharia, R atualizaria)
+        Keys.onShortcutOverride: (event) => event.accepted = true
     }
 
     // ---------------------------------------------------- contas
@@ -124,7 +128,9 @@ ColumnLayout {
                         background: Rectangle { radius: 4; color: theme.bgSoft; border.color: theme.accent }
                         onAccepted: { backend.renameAccount(section.provider.id, row.acc.id, text); visible = false }
                         Keys.onEscapePressed: visible = false
+                        Keys.onShortcutOverride: (event) => event.accepted = true
                         onActiveFocusChanged: if (!activeFocus) visible = false
+                        onVisibleChanged: section.renaming += visible ? 1 : -1
                     }
                     Text {
                         visible: row.acc.plan !== ""

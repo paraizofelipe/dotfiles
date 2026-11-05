@@ -7,7 +7,10 @@ import QtQuick.Window
 // panel do Omarchy, MIT). Dados prontos vêm de backend.model (agents_usage/view.py).
 Window {
     id: root
-    readonly property var model: backend.model
+    // Congelado enquanto um nome é editado: recriar as linhas descartaria o texto digitado.
+    property var model: backend.model
+    property int editing: 0
+    onEditingChanged: if (editing === 0) model = Qt.binding(() => backend.model)
     readonly property var geo: backend.geometry()
     property int selectedKey: 0
     property bool wasActive: false
@@ -42,7 +45,8 @@ Window {
         sequences: ["Return", "Enter"]
         onActivated: {
             const s = selectedAccount()
-            if (s && !s.account.active) backend.useAccount(s.provider.id, s.account.id)
+            if (s && !s.account.active && !s.account.needs_signin)
+                backend.useAccount(s.provider.id, s.account.id)
         }
     }
     Shortcut {
@@ -154,6 +158,10 @@ Window {
                             provider: modelData
                             selectedKey: root.selectedKey
                             last: index === (root.model.providers || []).length - 1
+                            onEditingChanged: {
+                                if (editing) root.model = root.model  // quebra o binding: congela
+                                root.editing += editing ? 1 : -1
+                            }
                         }
                     }
                 }

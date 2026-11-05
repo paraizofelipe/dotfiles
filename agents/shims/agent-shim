@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Shim de claude/codex: exporta a conta ativa (`agents account use`) e chama o CLI real.
-# Um CLAUDE_CONFIG_DIR/CODEX_HOME já definido tem precedência sobre a conta ativa.
+# Um CLAUDE_CONFIG_DIR/CODEX_HOME já definido tem precedência sobre a conta ativa, e
+# AGENTS_SKIP_ACTIVE=1 ignora a conta ativa (login da main com uma conta extra ativa).
 set -euo pipefail
 
 name=$(basename "$0")
@@ -11,7 +12,7 @@ case "$name" in
 esac
 
 pointer="${XDG_DATA_HOME:-$HOME/.local/share}/agents/active-$name"
-if [[ -z "${!var:-}" && -r "$pointer" ]]; then
+if [[ -z "${!var:-}" && -z "${AGENTS_SKIP_ACTIVE:-}" && -r "$pointer" ]]; then
   home=$(<"$pointer")
   [[ -n "$home" && -d "$home" ]] && export "$var=$home"
 fi
@@ -19,7 +20,7 @@ fi
 self=$(readlink -f "$0")
 IFS=: read -ra path_dirs <<<"$PATH"
 for dir in "${path_dirs[@]}"; do
-  candidate="$dir/$name"
+  candidate="${dir:-.}/$name"  # componente vazio no PATH = diretório atual
   [[ -x "$candidate" && ! -d "$candidate" ]] || continue
   [[ "$(readlink -f "$candidate")" == "$self" ]] && continue
   exec "$candidate" "$@"

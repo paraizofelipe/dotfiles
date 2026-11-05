@@ -25,19 +25,19 @@ def parse_claude_lines(lines):
             continue
         try:
             obj = json.loads(line)
-        except json.JSONDecodeError:
-            continue
-        msg = obj.get("message") or {}
-        usage, model = msg.get("usage"), msg.get("model")
-        ts = common.to_epoch(obj.get("timestamp"))
-        if obj.get("type") != "assistant" or not usage or not ts or model in SKIP_MODELS:
-            continue
-        key = msg.get("id") or obj.get("requestId") or obj.get("uuid")
-        found[key] = [key, ts, model or "unknown",
-                      int(usage.get("input_tokens") or 0),
-                      int(usage.get("output_tokens") or 0),
-                      int(usage.get("cache_read_input_tokens") or 0)
-                      + int(usage.get("cache_creation_input_tokens") or 0)]
+            msg = obj.get("message") or {}
+            usage, model = msg.get("usage"), msg.get("model")
+            ts = common.to_epoch(obj.get("timestamp"))
+            if obj.get("type") != "assistant" or not usage or not ts or model in SKIP_MODELS:
+                continue
+            key = msg.get("id") or obj.get("requestId") or obj.get("uuid")
+            found[key] = [key, ts, model or "unknown",
+                          int(usage.get("input_tokens") or 0),
+                          int(usage.get("output_tokens") or 0),
+                          int(usage.get("cache_read_input_tokens") or 0)
+                          + int(usage.get("cache_creation_input_tokens") or 0)]
+        except (ValueError, TypeError, AttributeError):
+            continue  # linha fora do formato esperado (JSONDecodeError é ValueError)
     return list(found.values())
 
 
@@ -50,25 +50,26 @@ def parse_codex_lines(lines, file_key):
             continue
         try:
             obj = json.loads(line)
-        except json.JSONDecodeError:
-            continue
-        payload = obj.get("payload") or {}
-        if obj.get("type") == "turn_context":
-            model = payload.get("model") or model
-            continue
-        if payload.get("type") != "token_count":
-            continue
-        info = payload.get("info") or {}
-        last = info.get("last_token_usage")
-        total = (info.get("total_token_usage") or {}).get("total_tokens")
-        ts = common.to_epoch(obj.get("timestamp"))
-        if not last or not ts or total == last_total:
-            continue
+            payload = obj.get("payload") or {}
+            if obj.get("type") == "turn_context":
+                model = payload.get("model") or model
+                continue
+            if payload.get("type") != "token_count":
+                continue
+            info = payload.get("info") or {}
+            last = info.get("last_token_usage")
+            total = (info.get("total_token_usage") or {}).get("total_tokens")
+            ts = common.to_epoch(obj.get("timestamp"))
+            if not last or not ts or total == last_total:
+                continue
+            cached = int(last.get("cached_input_tokens") or 0)
+            entry = [f"{file_key}:{len(entries)}", ts, model,
+                     max(0, int(last.get("input_tokens") or 0) - cached),
+                     int(last.get("output_tokens") or 0), cached]
+        except (ValueError, TypeError, AttributeError):
+            continue  # linha fora do formato esperado (JSONDecodeError é ValueError)
         last_total = total
-        cached = int(last.get("cached_input_tokens") or 0)
-        entries.append([f"{file_key}:{len(entries)}", ts, model,
-                        max(0, int(last.get("input_tokens") or 0) - cached),
-                        int(last.get("output_tokens") or 0), cached])
+        entries.append(entry)
     return entries
 
 

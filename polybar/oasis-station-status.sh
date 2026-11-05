@@ -26,7 +26,8 @@ seen=0
 count_station() {
     local count
     count=$(timeout 2s "$OASIS" station list --count 2>/dev/null)
-    [[ "$count" =~ ^[0-9]+$ ]] && echo "$count" || echo 0
+    # Falha não é "zero": zerar o seen faria notificações já vistas acenderem de novo
+    [[ "$count" =~ ^[0-9]+$ ]] && echo "$count"
 }
 
 display_status() {
@@ -50,8 +51,9 @@ coproc MONITOR {
 }
 trap 'kill "$MONITOR_PID" 2>/dev/null; exit' EXIT INT TERM
 
-seen=$(count_station)
+seen=$(count_station) || seen=0
 display_status "$seen"
+last=$seen
 
 while true; do
     toggled=0
@@ -64,7 +66,8 @@ while true; do
     elif [[ -z "${MONITOR_PID:-}" ]] || ! kill -0 "$MONITOR_PID" 2>/dev/null; then
         exit 1 # dbus-monitor morreu; o polybar reinicia o módulo
     fi
-    count=$(count_station)
+    count=$(count_station) || count=$last # consulta falhou: mantém a última contagem válida
+    last=$count
     ((toggled)) && seen=$count
     display_status "$count"
 done
